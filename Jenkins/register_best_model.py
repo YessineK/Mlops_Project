@@ -12,6 +12,10 @@ from dotenv import load_dotenv
 # Root is at Projects/MLOps/ (2 levels up)
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
+# Configuration DagsHub token
+DAGSHUB_TOKEN = 'f460bc1b164b8e147ccb2a8fc4208ae6075c0514'
+os.environ['MLFLOW_TRACKING_USERNAME'] = 'karrayyessine1'
+os.environ['MLFLOW_TRACKING_PASSWORD'] = DAGSHUB_TOKEN
 
 # Config
 DAGSHUB_USERNAME = os.getenv('DAGSHUB_USER', 'karrayyessine1')

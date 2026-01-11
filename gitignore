@@ -1,0 +1,46 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (ne pas push les gros fichiers)
+data/*.csv
+data/*.pkl
+*.csv
+*.pkl
+!processors/*.pkl
+!processors/models/*.pkl
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Docker
+*.log
+
+# Environment
+.env
+*.env

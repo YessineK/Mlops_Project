@@ -1,40 +1,34 @@
-version: '3.8'
-
 services:
   backend:
     build:
-      context: ./backend/src
-      dockerfile: Dockerfile
-    container_name: fraud-detection-backend
+      context: ./backend
+      dockerfile: src/Dockerfile
+    container_name: churn-prediction-backend
     ports:
       - "8000:8000"
     volumes:
       - ./notebooks/processors:/app/processors
-      - ./notebooks/model_registry:/app/model_registry
+      - ./data:/app/data
     environment:
       - PYTHONUNBUFFERED=1
     networks:
-      - fraud-detection-network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - churn-network
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: fraud-detection-frontend
+    container_name: churn-prediction-frontend
     ports:
       - "8501:8501"
     depends_on:
       - backend
     environment:
       - PYTHONUNBUFFERED=1
+      - API_URL=http://backend:8000
     networks:
-      - fraud-detection-network
+      - churn-network
 
 networks:
-  fraud-detection-network:
+  churn-network:
     driver: bridge
