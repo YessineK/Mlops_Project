@@ -9,17 +9,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
-COPY src/requirements.txt .
+COPY backend/src/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY src/ .
+COPY backend/src/ .
 
 # Copy model files
 COPY notebooks/processors /app/processors
-
-# Create directories
-RUN mkdir -p /app/data
 
 # Expose port
 EXPOSE 8000
