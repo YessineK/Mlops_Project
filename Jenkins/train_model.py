@@ -3,30 +3,30 @@ import pandas as pd
 import pickle
 import mlflow
 import mlflow.sklearn
-import dagshub
 from datetime import datetime
 from pathlib import Path
 from lightgbm import LGBMClassifier
 from xgboost import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier
-# CatBoost enlevé pour compatibilité Python 3.13
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-from dotenv import load_dotenv
 
-# Configuration
+# Configuration - Utiliser les variables d'environnement de Jenkins
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
 
-DAGSHUB_USERNAME = os.getenv('DAGSHUB_USER', 'YessineK')
-DAGSHUB_REPO = os.getenv('DAGSHUB_REPO', 'Mlops_Project')
+# Récupérer depuis les variables d'environnement
+DAGSHUB_USERNAME = os.getenv('DAGSHUB_USER', 'karrayyessine1')
+DAGSHUB_REPO = os.getenv('DAGSHUB_REPO', 'MLOps_Project')
 MLFLOW_TRACKING_URI = os.getenv('MLFLOW_TRACKING_URI', f"https://dagshub.com/{DAGSHUB_USERNAME}/{DAGSHUB_REPO}.mlflow")
 
-# Initialize DagsHub and MLflow
-try:
-    dagshub.init(repo_owner=DAGSHUB_USERNAME, repo_name=DAGSHUB_REPO, mlflow=True)
-except Exception as e:
-    print(f"Warning: DagsHub init: {e}")
+# IMPORTANT : Configurer les credentials MLflow
+os.environ['MLFLOW_TRACKING_USERNAME'] = os.getenv('MLFLOW_TRACKING_USERNAME', DAGSHUB_USERNAME)
+os.environ['MLFLOW_TRACKING_PASSWORD'] = os.getenv('MLFLOW_TRACKING_PASSWORD', '')
 
+print(f"📡 MLflow URI: {MLFLOW_TRACKING_URI}")
+print(f"👤 Username: {DAGSHUB_USERNAME}")
+print(f"🗂️  Repo: {DAGSHUB_REPO}")
+
+# Initialize MLflow
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 mlflow.set_experiment("churn_prediction_continuous_training")
 
