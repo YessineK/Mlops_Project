@@ -18,17 +18,26 @@ DAGSHUB_USERNAME = os.getenv('DAGSHUB_USER', 'karrayyessine1')
 DAGSHUB_REPO = os.getenv('DAGSHUB_REPO', 'MLOps_Project')
 MLFLOW_TRACKING_URI = os.getenv('MLFLOW_TRACKING_URI', f"https://dagshub.com/{DAGSHUB_USERNAME}/{DAGSHUB_REPO}.mlflow")
 
-# IMPORTANT : Configurer les credentials MLflow
-os.environ['MLFLOW_TRACKING_USERNAME'] = os.getenv('MLFLOW_TRACKING_USERNAME', DAGSHUB_USERNAME)
-os.environ['MLFLOW_TRACKING_PASSWORD'] = os.getenv('MLFLOW_TRACKING_PASSWORD', '')
+# IMPORTANT : Récupérer le token depuis les variables d'environnement
+MLFLOW_TRACKING_USERNAME = os.getenv('MLFLOW_TRACKING_USERNAME', DAGSHUB_USERNAME)
+MLFLOW_TRACKING_PASSWORD = os.getenv('MLFLOW_TRACKING_PASSWORD', '')
 
+# Debug : afficher si le token existe (sans le montrer en entier)
 print(f"📡 MLflow URI: {MLFLOW_TRACKING_URI}")
-print(f"👤 Username: {DAGSHUB_USERNAME}")
-print(f"🗂️  Repo: {DAGSHUB_REPO}")
+print(f"👤 Username: {MLFLOW_TRACKING_USERNAME}")
+print(f"🔑 Password set: {'Yes' if MLFLOW_TRACKING_PASSWORD else 'No'}")
+print(f"🔑 Password length: {len(MLFLOW_TRACKING_PASSWORD)}")
+
+# Configurer MLflow avec authentification
+os.environ['MLFLOW_TRACKING_USERNAME'] = MLFLOW_TRACKING_USERNAME
+os.environ['MLFLOW_TRACKING_PASSWORD'] = MLFLOW_TRACKING_PASSWORD
 
 # Initialize MLflow
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+
+print("🔄 Attempting to set experiment...")
 mlflow.set_experiment("churn_prediction_continuous_training")
+print("✅ Experiment set successfully!")
 
 def load_data(filepath):
     """Charge les données preprocessées."""
