@@ -44,15 +44,14 @@ pipeline {
                 }
             }
         }
-
         stage('Health Check') {
             steps {
                 script {
                     echo '🏥 Checking health...'
                     sh '''
-                        sleep 20
-                        curl -f http://localhost:8000/health || exit 1
-                        echo "✅ Backend is healthy"
+                        sleep 30
+                        docker exec churn-prediction-backend curl -f http://localhost:8000/health
+                        docker exec churn-prediction-frontend curl -f http://localhost:8501/_stcore/health
                     '''
                 }
             }
