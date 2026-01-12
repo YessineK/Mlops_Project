@@ -15,6 +15,18 @@ pipeline {
             }
         }
 
+        stage('Stop Old Containers') {
+            steps {
+                script {
+                    echo '🛑 Stopping old containers...'
+                    sh '''
+                        docker rm -f churn-prediction-backend churn-prediction-frontend || true
+                        docker compose down || true
+                    '''
+                }
+            }
+        }
+
         stage('Build Docker Images') {
             steps {
                 script {
@@ -28,10 +40,7 @@ pipeline {
             steps {
                 script {
                     echo '🚀 Deploying...'
-                    sh '''
-                        docker compose down
-                        docker compose up -d
-                    '''
+                    sh 'docker compose up -d'
                 }
             }
         }
@@ -41,8 +50,9 @@ pipeline {
                 script {
                     echo '🏥 Checking health...'
                     sh '''
-                        sleep 15
+                        sleep 20
                         curl -f http://localhost:8000/health || exit 1
+                        echo "✅ Backend is healthy"
                     '''
                 }
             }
@@ -55,6 +65,7 @@ pipeline {
         }
         failure {
             echo '❌ Pipeline failed!'
+            sh 'docker compose logs || true'
         }
     }
 }
