@@ -1,20 +1,62 @@
 pipeline {
     agent any
-
+    
     environment {
-        MLFLOW_TRACKING_USERNAME = 'karrayyessine1'
+        // 🔐 VOS VRAIES CREDENTIALS
+        MLFLOW_TRACKING_USERNAME = 'YessineK'
         MLFLOW_TRACKING_PASSWORD = credentials('dagshub-token')
-        MLFLOW_TRACKING_URI = 'https://dagshub.com/karrayyessine1/MLOps_Project.mlflow'
+        MLFLOW_TRACKING_URI = 'https://dagshub.com/YessineK/Mlops_Project.mlflow'
         DAGSHUB_TOKEN = credentials('dagshub-token')
+        DAGSHUB_USER = 'YessineK'
+        DAGSHUB_REPO = 'Mlops_Project'
     }
-
+    
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
+        
+        stage('Setup Environment') {
+            steps {
+                script {
+                    echo '🔧 Setting up Python environment...'
+                    sh '''
+                        python3 -m venv venv
+                        . venv/bin/activate
+                        pip install --upgrade pip
+                        pip install -r requirements.txt
+                        pip install dagshub mlflow
+                    '''
+                }
+            }
+        }
+        
+        stage('Continuous Training') {
+            steps {
+                script {
+                    echo '🎓 Training models with MLflow...'
+                    sh '''
+                        . venv/bin/activate
+                        python3 Jenkins/train_model.py
+                    '''
+                }
+            }
+        }
+        
+        stage('Register Best Model') {
+            steps {
+                script {
+                    echo '📥 Downloading best model from MLflow Registry...'
+                    sh '''
+                        . venv/bin/activate
+                        python3 Jenkins/register_best_model.py
+                    '''
+                }
+            }
+        }
+        
         stage('Stop Old Containers') {
             steps {
                 script {
@@ -26,7 +68,7 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Build Docker Images') {
             steps {
                 script {
@@ -35,23 +77,23 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Deploy') {
             steps {
                 script {
-                    echo '🚀 Deploying...'
+                    echo '🚀 Deploying containers...'
                     sh 'docker compose up -d'
                 }
             }
         }
+        
         stage('Health Check') {
             steps {
                 script {
-                    echo '🏥 Checking health...'
+                    echo '🏥 Checking application health...'
                     sh '''
                         sleep 30
                         docker exec churn-prediction-backend curl -f http://localhost:8000/health
-                        docker exec churn-prediction-frontend curl -f http://localhost:8501/_stcore/health
                     '''
                 }
             }
@@ -60,11 +102,15 @@ pipeline {
     
     post {
         success {
-            echo '✅ Pipeline succeeded!'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
             echo '❌ Pipeline failed!'
-            sh 'docker compose logs || true'
+            sh 'docker compose logs'
+        }
+        always {
+            echo '🧹 Cleaning up...'
+            sh 'rm -rf venv'
         }
     }
 }
