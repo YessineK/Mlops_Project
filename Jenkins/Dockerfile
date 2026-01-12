@@ -15,5 +15,4 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Revenir à l'utilisateur jenkins
 USER jenkins

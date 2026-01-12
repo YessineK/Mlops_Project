@@ -4,10 +4,10 @@ pipeline {
     environment {
         MLFLOW_TRACKING_USERNAME = 'karrayyessine1'
         MLFLOW_TRACKING_PASSWORD = credentials('dagshub-token')
-        MLFLOW_TRACKING_URI = 'https://dagshub.com/karrayyessine1/mlops-fraud-detection.mlflow'
+        MLFLOW_TRACKING_URI = 'https://dagshub.com/karrayyessine1/MLOps_Project.mlflow'
         DAGSHUB_TOKEN = credentials('dagshub-token')
         DAGSHUB_USER = 'karrayyessine1'
-        DAGSHUB_REPO = 'mlops-fraud-detection'
+        DAGSHUB_REPO = 'MLOps_Project'
     }
 
     stages {
@@ -20,88 +20,93 @@ pipeline {
         stage('Setup Environment') {
             steps {
                 script {
-                    echo 'Creating Virtual Environment...'
+                    echo '🔧 Creating Virtual Environment...'
                     sh '''
                         python3 -m venv venv
                         . venv/bin/activate
                         pip install --upgrade pip
-                        pip install -r requirements.txt
-                        pip install dagshub
+                        pip install -r backend/src/requirements.txt
                     '''
                 }
             }
         }
 
-        stage('Continuous Training') {
-            when { expression { false } }
+        stage('Verify Model') {
             steps {
                 script {
-                    echo "Starting Model Training..."
+                    echo '🔍 Verifying model files...'
                     sh '''
-                        . venv/bin/activate
-                        python3 Jenkins/train_model.py
+                        echo "=== Checking processors directory ==="
+                        ls -la notebooks/processors/models/ || echo "❌ Models not found"
+                        
+                        echo ""
+                        echo "=== Checking best model ==="
+                        test -f notebooks/processors/models/best_model_final.pkl && echo "✅ Model found" || echo "❌ Model missing"
                     '''
                 }
             }
         }
 
-        stage('Register Best Model') {
-            when { expression { false } }
+        stage('Test Model') {
             steps {
                 script {
-                    echo "Registering and Loading Best Model..."
+                    echo '🧪 Testing model predictions...'
                     sh '''
                         . venv/bin/activate
-                        python3 Jenkins/register_best_model.py
+                        python3 -c "
+import pickle
+import numpy as np
+
+# Load model
+with open('notebooks/processors/models/best_model_final.pkl', 'rb') as f:
+    model = pickle.load(f)
+
+# Load test data
+with open('notebooks/processors/preprocessed_data.pkl', 'rb') as f:
+    data = pickle.load(f)
+    X_test = data['X_test'][:5]
+
+# Test prediction
+pred = model.predict(X_test)
+print('✅ Model prediction test passed')
+print(f'Predictions: {pred}')
+"
                     '''
                 }
             }
         }
 
-        stage('Run Tests') {
-            when { expression { false } }
+        stage('Build Docker Images') {
             steps {
                 script {
-                    echo "Running Fraud Scenario Test..."
+                    echo '🐳 Building Docker images...'
                     sh '''
-                        . venv/bin/activate
-                        python3 testing/test_fraud_scenario.py
+                        docker compose build
                     '''
                 }
             }
         }
-        // ============ AJOUTEZ CETTE ÉTAPE ICI ============
-        stage('Debug - Check Files') {
+
+        stage('Deploy') {
             steps {
                 script {
-                    sh '''
-                        echo "=== Current directory ==="
-                        pwd
-                        echo ""
-                        echo "=== Files in root ==="
-                        ls -la
-                        echo ""
-                        echo "=== Check if backend exists ==="
-                        ls -la backend/ || echo "❌ backend directory not found"
-                        echo ""
-                        echo "=== Check if frontend exists ==="
-                        ls -la frontend/ || echo "❌ frontend directory not found"
-                        echo ""
-                        echo "=== Check docker-compose.yml ==="
-                        cat docker-compose.yml || echo "❌ docker-compose.yml not found"
-                    '''
-                }
-            }
-        }
-        // ================================================
-        
-        stage('Build and Deploy') {
-            steps {
-                script {
-                    echo "Building and Deploying with Docker Compose..."
+                    echo '🚀 Deploying with Docker Compose...'
                     sh '''
                         docker compose down
-                        docker compose up -d --build
+                        docker compose up -d
+                    '''
+                }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                script {
+                    echo '🏥 Checking service health...'
+                    sh '''
+                        sleep 15
+                        curl -f http://localhost:8000/health || exit 1
+                        echo "✅ Backend is healthy"
                     '''
                 }
             }
@@ -110,13 +115,16 @@ pipeline {
     
     post {
         always {
-            cleanWs()
+            echo '🧹 Cleaning up...'
+            sh 'docker compose logs backend || true'
+            sh 'docker compose logs frontend || true'
         }
         success {
-            echo 'Training pipeline completed successfully.'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo 'Training pipeline failed.'
+            echo '❌ Pipeline failed!'
+            sh 'docker compose down || true'
         }
     }
 }
