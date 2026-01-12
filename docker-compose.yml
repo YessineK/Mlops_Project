@@ -7,8 +7,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./notebooks/processors:/app/processors
-      - ./data:/app/data
+      - ./notebooks/processors:/app/processors:ro
+      - ./data:/app/data:ro
     environment:
       - PYTHONUNBUFFERED=1
     networks:
