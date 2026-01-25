@@ -34,7 +34,20 @@ services:
     networks:
       - churn-network
     restart: unless-stopped
-
+  reports:
+    container_name: monitoring-reports
+    image: nginx:alpine
+    ports:
+      - "9000:80"
+    volumes:
+      - ./monitoring:/usr/share/nginx/html:ro
+    networks:
+      - churn-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 networks:
   churn-network:
     driver: bridge
