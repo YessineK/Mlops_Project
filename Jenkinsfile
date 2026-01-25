@@ -375,13 +375,12 @@ pipeline {
                 echo ''
                 echo '🧹 Nettoyage final...'
                 
-                // Nettoyage optionnel des images inutilisées
                 sh '''
-                    echo "🗑️  Suppression des images Docker non utilisées (danglings)..."
+                    echo "🗑️  Suppression des images Docker non utilisées..."
                     docker image prune -f || true
                 '''
                 
-                echo "📊 Build ${BUILD_TAG} terminé à $(date)"
+                echo "📊 Build ${BUILD_TAG} terminé"
             }
         }
     }
