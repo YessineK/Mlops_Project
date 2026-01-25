@@ -2,9 +2,9 @@ pipeline {
     agent any
     
     environment {
-        // Docker Hub (configurez les credentials dans Jenkins)
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
+        // Docker Hub - Remplacez par vos credentials
         DOCKER_HUB_USERNAME = 'karrayyessine1'
+        DOCKER_HUB_PASSWORD = '' // Laisser vide pour l'instant
         
         // Image names
         BACKEND_IMAGE = "${DOCKER_HUB_USERNAME}/churn-backend"
@@ -163,24 +163,15 @@ pipeline {
         
         stage('🚀 Push to Docker Hub') {
             steps {
-                echo '🚀 Push vers Docker Hub...'
-                sh """
-                    echo "🔐 Login Docker Hub..."
-                    echo \${DOCKER_HUB_CREDENTIALS_PSW} | docker login -u \${DOCKER_HUB_CREDENTIALS_USR} --password-stdin
-                    
-                    echo ""
-                    echo "📤 Push Backend..."
-                    docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
-                    docker push ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST}
-                    
-                    echo ""
-                    echo "📤 Push Frontend..."
-                    docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
-                    docker push ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST}
-                    
-                    echo ""
-                    echo "✅ Images pushed successfully!"
-                """
+                script {
+                    echo '⚠️ Push Docker Hub désactivé pour ce build'
+                    echo '💡 Configurez Docker Hub credentials pour activer le push'
+                    echo ''
+                    echo '📦 Images créées localement:'
+                    sh """
+                        docker images | grep churn || true
+                    """
+                }
             }
         }
         
@@ -219,24 +210,27 @@ pipeline {
     
     post {
         success {
-            echo '✅✅✅ PIPELINE RÉUSSI! ✅✅✅'
-            echo ''
-            echo '🎉 Images disponibles sur Docker Hub:'
-            echo "   → docker pull ${BACKEND_IMAGE}:latest"
-            echo "   → docker pull ${FRONTEND_IMAGE}:latest"
+            script {
+                echo '✅✅✅ PIPELINE RÉUSSI! ✅✅✅'
+                echo ''
+                echo '🎉 Images Docker créées:'
+                echo "   Backend:  ${BACKEND_IMAGE}:${IMAGE_TAG}"
+                echo "   Frontend: ${FRONTEND_IMAGE}:${IMAGE_TAG}"
+            }
         }
         
         failure {
-            echo '❌❌❌ PIPELINE ÉCHOUÉ! ❌❌❌'
-            echo 'Vérifiez les logs ci-dessus'
+            script {
+                echo '❌❌❌ PIPELINE ÉCHOUÉ! ❌❌❌'
+                echo 'Vérifiez les logs ci-dessus'
+            }
         }
         
         always {
-            echo '🧹 Nettoyage final...'
-            sh '''
-                docker logout || true
+            script {
+                echo '🧹 Nettoyage final...'
                 echo "📊 Build ${BUILD_TAG} terminé"
-            '''
+            }
         }
     }
 }
