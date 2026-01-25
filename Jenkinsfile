@@ -188,7 +188,25 @@ pipeline {
                 }
             }
         }
-        
+        stage('🚀 Deploy Application') {
+            steps {
+                echo '🚀 Déploiement de l’application (Backend + Frontend)...'
+                sh '''
+                    cd /var/jenkins_home/workspace/Yessine\\ Karray
+                    
+                    echo "🛑 Arrêt des conteneurs existants (si présents)..."
+                    docker-compose down || true
+                    
+                    echo "🚀 Lancement des conteneurs..."
+                    docker-compose up -d
+                    
+                    echo ""
+                    echo "🔍 Conteneurs actifs:"
+                    docker ps | grep churn || true
+                '''
+            }
+        }
+       
         stage('📊 Generate Report') {
             steps {
                 echo '📊 Génération du rapport...'
