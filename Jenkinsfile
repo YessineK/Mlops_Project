@@ -166,6 +166,27 @@ pipeline {
                                 fingerprint: true
             }
         }
+        stage('📊 Start Reports Web Server') {
+            steps {
+                echo '🌐 Démarrage du serveur web pour les rapports...'
+                sh '''
+                    # Arrêter le conteneur précédent s'il existe
+                    docker rm -f monitoring-reports 2>/dev/null || true
+                    
+                    # Lancer Nginx qui sert le dossier monitoring/
+                    docker run -d \
+                        --name monitoring-reports \
+                        --network yessinekarray_churn-network \
+                        -p 9000:80 \
+                        -v "${WORKSPACE}/monitoring":/usr/share/nginx/html:ro \
+                        nginx:alpine
+                    
+                    echo ""
+                    echo "✅ Serveur web démarré sur http://localhost:9000"
+                    echo "📊 Ouvrez votre navigateur: http://localhost:9000"
+                '''
+            }
+        }
         stage('🐳 Build Docker Images') {
             parallel {
                 stage('Build Backend Image') {
