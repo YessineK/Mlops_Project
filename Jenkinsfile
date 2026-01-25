@@ -4,7 +4,7 @@ pipeline {
     environment {
         // Docker Hub credentials
         DOCKER_HUB_USERNAME = 'karrayyessine1'
-        DOCKER_HUB_CREDENTIALS = 'docker-hub-credentials' // ID dans Jenkins Credentials
+        DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-credentials'
         
         // Image names
         BACKEND_IMAGE = "${DOCKER_HUB_USERNAME}/churn-backend"
@@ -13,9 +13,6 @@ pipeline {
         // Version
         IMAGE_TAG = "v${BUILD_NUMBER}"
         IMAGE_TAG_LATEST = "latest"
-        
-        // Workspace path
-        WORKSPACE_PATH = "/var/jenkins_home/workspace/${JOB_NAME}"
     }
     
     stages {
@@ -119,7 +116,6 @@ pipeline {
                         ls -lh "$MODEL_FILE"
                     else
                         echo "❌ ERREUR CRITIQUE: Modèle non trouvé!"
-                        echo "Le fichier $MODEL_FILE est requis pour le build Docker."
                         exit 1
                     fi
                     
@@ -129,8 +125,7 @@ pipeline {
                         echo "✅ Preprocessor trouvé: $PREPROCESSOR_FILE"
                         ls -lh "$PREPROCESSOR_FILE"
                     else
-                        echo "⚠️  WARNING: Preprocessor non trouvé à $PREPROCESSOR_FILE"
-                        echo "Cela pourrait causer des problèmes lors de l'exécution."
+                        echo "⚠️  WARNING: Preprocessor non trouvé"
                     fi
                 '''
             }
@@ -201,17 +196,12 @@ pipeline {
         }
         
         stage('🚀 Push to Docker Hub') {
-            when {
-                expression { 
-                    // Active le push seulement si les credentials existent
-                    return env.DOCKER_HUB_CREDENTIALS != null 
-                }
-            }
             steps {
                 script {
                     echo '📤 Push des images vers Docker Hub...'
+                    
                     withCredentials([usernamePassword(
-                        credentialsId: "${DOCKER_HUB_CREDENTIALS}",
+                        credentialsId: env.DOCKER_HUB_CREDENTIALS_ID,
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_PASS'
                     )]) {
@@ -222,16 +212,23 @@ pipeline {
                             echo ""
                             echo "📤 Push Backend images..."
                             docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
+                            echo "✅ Pushed: ${BACKEND_IMAGE}:${IMAGE_TAG}"
+                            
                             docker push ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST}
+                            echo "✅ Pushed: ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST}"
                             
                             echo ""
                             echo "📤 Push Frontend images..."
                             docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
+                            echo "✅ Pushed: ${FRONTEND_IMAGE}:${IMAGE_TAG}"
+                            
                             docker push ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST}
+                            echo "✅ Pushed: ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST}"
                             
                             echo ""
                             echo "✅ Toutes les images ont été pushées avec succès!"
                             
+                            echo ""
                             echo "🔓 Déconnexion de Docker Hub..."
                             docker logout
                         '''
@@ -268,10 +265,6 @@ pipeline {
                     docker-compose ps
                     
                     echo ""
-                    echo "🔍 Conteneurs en cours d'exécution:"
-                    docker ps --filter "name=churn" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-                    
-                    echo ""
                     echo "✅ Déploiement terminé!"
                 '''
             }
@@ -281,18 +274,15 @@ pipeline {
             steps {
                 echo '🏥 Vérification de la santé des services...'
                 sh '''
-                    echo "🔍 Test de connectivité Backend..."
-                    sleep 5
-                    
-                    # Tentative de connexion au backend (ajustez le port si nécessaire)
-                    curl -f http://localhost:8000/health || echo "⚠️  Backend health check échoué"
+                    echo "🔍 Conteneurs en cours d'exécution:"
+                    docker ps --filter "name=churn" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || true
                     
                     echo ""
-                    echo "🔍 Logs Backend (dernières lignes):"
+                    echo "🔍 Logs Backend (dernières 20 lignes):"
                     docker-compose logs --tail=20 backend || true
                     
                     echo ""
-                    echo "🔍 Logs Frontend (dernières lignes):"
+                    echo "🔍 Logs Frontend (dernières 20 lignes):"
                     docker-compose logs --tail=20 frontend || true
                 '''
             }
@@ -311,7 +301,6 @@ pipeline {
                     echo "   Build Number:     #${BUILD_NUMBER}"
                     echo "   Build Tag:        ${BUILD_TAG}"
                     echo "   Job Name:         ${JOB_NAME}"
-                    echo "   Build URL:        ${BUILD_URL}"
                     echo "   Timestamp:        $(date)"
                     echo ""
                     echo "🐳 Docker Images Created:"
@@ -324,20 +313,16 @@ pipeline {
                     echo "   Backend:  https://hub.docker.com/r/${DOCKER_HUB_USERNAME}/churn-backend"
                     echo "   Frontend: https://hub.docker.com/r/${DOCKER_HUB_USERNAME}/churn-frontend"
                     echo ""
-                    echo "🚀 Deployment Commands:"
-                    echo "   Pull images:"
-                    echo "     docker pull ${BACKEND_IMAGE}:latest"
-                    echo "     docker pull ${FRONTEND_IMAGE}:latest"
-                    echo ""
-                    echo "   Deploy with docker-compose:"
-                    echo "     docker-compose up -d"
+                    echo "🚀 Pull & Deploy Commands:"
+                    echo "   docker pull ${BACKEND_IMAGE}:latest"
+                    echo "   docker pull ${FRONTEND_IMAGE}:latest"
+                    echo "   docker-compose up -d"
                     echo ""
                     echo "📊 Current Containers:"
-                    docker ps --filter "name=churn" --format "   {{.Names}} - {{.Status}}"
+                    docker ps --filter "name=churn" --format "   {{.Names}} - {{.Status}}" || true
                     echo ""
                     echo "✅ Build completed successfully!"
                     echo "================================================================================"
-                    echo ""
                 '''
             }
         }
@@ -348,11 +333,13 @@ pipeline {
             script {
                 echo '✅✅✅ PIPELINE EXÉCUTÉ AVEC SUCCÈS! ✅✅✅'
                 echo ''
-                echo '🎉 Images Docker créées et déployées:'
+                echo '🎉 Images Docker créées et pushées:'
                 echo "   Backend:  ${BACKEND_IMAGE}:${IMAGE_TAG}"
                 echo "   Frontend: ${FRONTEND_IMAGE}:${IMAGE_TAG}"
                 echo ''
-                echo '🌐 Application disponible localement'
+                echo '🌐 Vos images sont disponibles sur Docker Hub!'
+                echo "   https://hub.docker.com/r/${DOCKER_HUB_USERNAME}/churn-backend"
+                echo "   https://hub.docker.com/r/${DOCKER_HUB_USERNAME}/churn-frontend"
             }
         }
         
@@ -363,9 +350,9 @@ pipeline {
                 echo '🔍 Vérifiez les logs ci-dessus pour identifier l\'erreur'
                 echo ''
                 echo '💡 Erreurs communes:'
+                echo '   - Credentials Docker Hub incorrects'
                 echo '   - Modèle ML non trouvé'
-                echo '   - Dockerfile manquant ou incorrect'
-                echo '   - docker-compose.yml manquant'
+                echo '   - Dockerfile manquant'
                 echo '   - Port déjà utilisé'
             }
         }
