@@ -1,0 +1,19 @@
+# ============================================================================
+# FRONTEND - Churn Prediction Dashboard
+# ============================================================================
+
+# Streamlit Framework
+streamlit==1.41.1
+
+# HTTP Requests
+requests==2.32.3
+
+# Data Processing
+pandas==2.2.3
+numpy==1.26.4
+
+# Visualization
+plotly==5.18.0
+
+# Utilities
+python-dotenv==1.0.1

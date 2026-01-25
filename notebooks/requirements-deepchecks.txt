@@ -1,0 +1,6 @@
+# Requirements for Deepchecks Validation Notebook
+# Install separately: pip install -r notebooks/requirements-deepchecks.txt
+
+pandas<2.2.0,>=1.1.5
+scikit-learn<1.4.0,>=0.23.2
+deepchecks==0.18.1

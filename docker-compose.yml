@@ -1,0 +1,40 @@
+services:
+  backend:
+    build:
+      context: ./backend/src
+      dockerfile: Dockerfile
+    container_name: churn-prediction-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - churn-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: churn-prediction-frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_URL=http://backend:8000
+    networks:
+      - churn-network
+    restart: unless-stopped
+
+networks:
+  churn-network:
+    driver: bridge

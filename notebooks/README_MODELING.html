@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README_MODELING.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="%F0%9F%8E%AF-d%C3%A9tection-de-fraude-bancaire---mod%C3%A9lisation">🎯 Détection de Fraude Bancaire - Modélisation</h1>
+<p><strong>Projet MLOps - Fine-Tuning et Ensemble Learning pour la Détection de Fraudes</strong></p>
+<blockquote>
+<p>Pipeline complet de modélisation avancée avec optimisation d'hyperparamètres (RandomizedSearchCV) et méthodes d'ensemble (Stacking, Voting) pour maximiser les performances.</p>
+</blockquote>
+<hr>
+<h2 id="%F0%9F%93%8B-table-des-mati%C3%A8res">📋 Table des Matières</h2>
+<ul>
+<li><a href="#-vue-densemble">Vue d'Ensemble</a></li>
+<li><a href="#-structure-du-projet">Structure du Projet</a></li>
+<li><a href="#-installation">Installation</a></li>
+<li><a href="#-utilisation">Utilisation</a></li>
+<li><a href="#-pipeline-complet">Pipeline Complet</a></li>
+<li><a href="#-r%C3%A9sultats">Résultats</a></li>
+<li><a href="#-architecture">Architecture</a></li>
+<li><a href="#-d%C3%A9ploiement">Déploiement</a></li>
+<li><a href="#-contribuer">Contribuer</a></li>
+</ul>
+<hr>
+<h2 id="%F0%9F%8C%9F-vue-densemble">🌟 Vue d'Ensemble</h2>
+<h3 id="objectif">Objectif</h3>
+<p>Développer un système de détection de fraude bancaire hautement performant en utilisant:</p>
+<ul>
+<li><strong>Fine-tuning automatisé</strong> avec RandomizedSearchCV</li>
+<li><strong>Ensemble Learning</strong> (Stacking et Voting)</li>
+<li><strong>Comparaison multi-niveaux</strong> (Baseline vs Tuned vs Ensemble)</li>
+</ul>
+<h3 id="mod%C3%A8les-impl%C3%A9ment%C3%A9s">Modèles Implémentés</h3>
+<table>
+<thead>
+<tr>
+<th>Modèle</th>
+<th>Type</th>
+<th>Performances Attendues</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Random Forest</strong></td>
+<td>Ensemble</td>
+<td>ROC-AUC: 0.94-0.97</td>
+</tr>
+<tr>
+<td><strong>XGBoost</strong></td>
+<td>Gradient Boosting</td>
+<td>ROC-AUC: 0.95-0.98</td>
+</tr>
+<tr>
+<td><strong>LightGBM</strong></td>
+<td>Gradient Boosting</td>
+<td>ROC-AUC: 0.94-0.97</td>
+</tr>
+<tr>
+<td><strong>CatBoost</strong></td>
+<td>Gradient Boosting</td>
+<td>ROC-AUC: 0.95-0.97</td>
+</tr>
+<tr>
+<td><strong>Stacking</strong></td>
+<td>Meta-Ensemble</td>
+<td>ROC-AUC: 0.96-0.98</td>
+</tr>
+<tr>
+<td><strong>Voting</strong></td>
+<td>Soft Ensemble</td>
+<td>ROC-AUC: 0.95-0.97</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pipeline-en-3-phases">Pipeline en 3 Phases</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph LR
+    A[Phase 1: Baseline] --> B[Phase 2: Fine-Tuning]
+    B --> C[Phase 3: Stacking]
+    C --> D[Meilleur Modèle]
+</div></code></pre>
+<ol>
+<li><strong>Phase 1</strong>: Entraînement des modèles avec paramètres par défaut</li>
+<li><strong>Phase 2</strong>: Optimisation des hyperparamètres (RandomizedSearchCV)</li>
+<li><strong>Phase 3</strong>: Création d'ensembles (Stacking + Voting)</li>
+</ol>
+<hr>
+<h2 id="%F0%9F%93%81-structure-du-projet">📁 Structure du Projet</h2>
+<pre class="hljs"><code><div>projet/
+│
+├── README.md                          # ← Ce fichier
+├── requirements.txt                   # ← Dépendances Python (racine)
+│
+├── data/
+│   └── fraud.csv                      # Données brutes
+│
+├── notebooks/
+│   ├── fraud_detection_modeling.ipynb  # ← Notebook principal
+│   └── processors/                    # Généré par preprocessing et notebook
+│       ├── preprocessed_data.pkl      # Données preprocessées
+│       ├── scaler.pkl                 # RobustScaler
+│       ├── label_encoders.pkl         # Encodeurs
+│       ├── feature_names.pkl          # Noms des features
+│       ├── smote_config.pkl           # Configuration SMOTE
+│       ├── models/                    # Modèles sauvegardés
+│       │   ├── best_model_final.pkl   # Meilleur modèle global
+│       │   ├── best_model_final_metadata.pkl
+│       │   ├── all_tuned_models.pkl   # Tous les modèles tunés
+│       │   └── ensemble_models.pkl    # Stacking + Voting
+│       ├── model_comparison_final.csv # Tableau comparatif
+│       ├── model_improvements.csv     # Analyse des gains
+│       └── modeling_report_final.txt  # Rapport détaillé
+│
+└── backend/
+    └── src/
+        ├── preprocessing_fraud_class.py  # Classe de preprocessing
+        └── model_inference.py            # ← Script d'inférence (production)
+</div></code></pre>
+<h3 id="%F0%9F%93%A6-fichiers-cl%C3%A9s">📦 Fichiers Clés</h3>
+<table>
+<thead>
+<tr>
+<th>Fichier</th>
+<th>Description</th>
+<th>Localisation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>requirements.txt</code></td>
+<td>Dépendances Python</td>
+<td><strong>Racine</strong></td>
+</tr>
+<tr>
+<td><code>fraud_detection_modeling.ipynb</code></td>
+<td>Notebook principal</td>
+<td><code>notebooks/</code></td>
+</tr>
+<tr>
+<td><code>model_inference.py</code></td>
+<td>Script d'inférence</td>
+<td><strong><code>backend/src/</code></strong></td>
+</tr>
+<tr>
+<td><code>preprocessing_fraud_class.py</code></td>
+<td>Preprocessing</td>
+<td><code>backend/src/</code></td>
+</tr>
+<tr>
+<td><code>best_model_final.pkl</code></td>
+<td>Meilleur modèle</td>
+<td><code>notebooks/processors/models/</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="%F0%9F%9A%80-installation">🚀 Installation</h2>
+<h3 id="1%EF%B8%8F%E2%83%A3-pr%C3%A9requis">1️⃣ Prérequis</h3>
+<ul>
+<li>Python 3.11 ou supérieur</li>
+<li>pip (gestionnaire de packages)</li>
+<li>8-16 GB RAM disponible</li>
+<li>10-20 GB espace disque</li>
+</ul>
+<h3 id="2%EF%B8%8F%E2%83%A3-installer-les-d%C3%A9pendances">2️⃣ Installer les Dépendances</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Créer un environnement conda (recommandé)</span>
+conda create -n mlops python=3.11 anaconda 
+
+<span class="hljs-comment"># Activer l'environnement</span>
+conda activate mlops
+
+<span class="hljs-comment"># Installer les dépendances depuis la racine</span>
+pip install -r requirements.txt
+</div></code></pre>
+<p><strong>Note</strong>: Le fichier <code>requirements.txt</code> est à la <strong>racine</strong> du projet.</p>
+<h3 id="3%EF%B8%8F%E2%83%A3-v%C3%A9rifier-linstallation">3️⃣ Vérifier l'Installation</h3>
+<pre class="hljs"><code><div>python -c <span class="hljs-string">"import pandas, sklearn, xgboost, lightgbm, catboost; print('✅ Tout est installé!')"</span>
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%92%BB-utilisation">💻 Utilisation</h2>
+<h3 id="%C3%A9tape-1-preprocessing-pr%C3%A9requis">Étape 1: Preprocessing (Prérequis)</h3>
+<p><strong>⚠️ IMPORTANT</strong>: Avant d'exécuter le notebook, le preprocessing doit être effectué.</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">cd</span> backend/src/
+python preprocessing_fraud_class.py
+</div></code></pre>
+<p>Cela créera le dossier <code>notebooks/processors/</code> avec:</p>
+<ul>
+<li><code>preprocessed_data.pkl</code></li>
+<li><code>scaler.pkl</code></li>
+<li><code>label_encoders.pkl</code></li>
+<li><code>feature_names.pkl</code></li>
+</ul>
+<h3 id="%C3%A9tape-2-lancer-le-notebook">Étape 2: Lancer le Notebook</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Depuis la racine du projet</span>
+<span class="hljs-built_in">cd</span> notebooks/
+jupyter notebook fraud_detection_modeling.ipynb
+</div></code></pre>
+<h3 id="%C3%A9tape-3-ex%C3%A9cuter-le-notebook">Étape 3: Exécuter le Notebook</h3>
+<p>Dans Jupyter:</p>
+<ol>
+<li>Ouvrir <code>fraud_detection_modeling.ipynb</code></li>
+<li>Menu: <strong>Cell → Run All</strong></li>
+<li>⏳ Attendre 20-30 minutes (fine-tuning inclus)</li>
+</ol>
+<h3 id="configuration-rapide-vs-compl%C3%A8te">Configuration Rapide vs Complète</h3>
+<h4 id="%E2%9A%A1-mode-rapide-test">⚡ Mode Rapide (Test)</h4>
+<p>Dans la cellule 5.2, modifier:</p>
+<pre class="hljs"><code><div>tuned_models, best_params = fine_tune_models(
+    baseline_models,
+    param_distributions,
+    X_train,
+    y_train,
+    n_iter=<span class="hljs-number">5</span>,   <span class="hljs-comment"># ← Réduire à 5 pour test rapide</span>
+    cv=<span class="hljs-number">2</span>        <span class="hljs-comment"># ← Réduire à 2</span>
+)
+</div></code></pre>
+<p><strong>Temps</strong>: ~5-10 minutes</p>
+<h4 id="%F0%9F%8F%86-mode-production-optimal">🏆 Mode Production (Optimal)</h4>
+<pre class="hljs"><code><div>tuned_models, best_params = fine_tune_models(
+    baseline_models,
+    param_distributions,
+    X_train,
+    y_train,
+    n_iter=<span class="hljs-number">50</span>,  <span class="hljs-comment"># ← Augmenter à 50 pour meilleurs résultats</span>
+    cv=<span class="hljs-number">5</span>        <span class="hljs-comment"># ← Augmenter à 5 pour validation robuste</span>
+)
+</div></code></pre>
+<p><strong>Temps</strong>: ~45-60 minutes</p>
+<hr>
+<h2 id="%F0%9F%94%84-pipeline-complet">🔄 Pipeline Complet</h2>
+<h3 id="vue-densemble">Vue d'Ensemble</h3>
+<pre class="hljs"><code><div>┌─────────────────────────────────────────────────────────────────┐
+│                    PIPELINE COMPLET                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. PREPROCESSING                                               │
+│     └─ backend/src/preprocessing_fraud_class.py                │
+│        • Nettoyage des données                                  │
+│        • Feature engineering                                    │
+│        • Encodage et normalisation                              │
+│        • SMOTE pour équilibrage                                 │
+│        • Sauvegarde: notebooks/processors/                     │
+│                                                                 │
+│  2. MODÉLISATION BASELINE                                       │
+│     └─ notebooks/fraud_detection_modeling.ipynb       │
+│        • Random Forest                                          │
+│        • XGBoost                                                │
+│        • LightGBM                                               │
+│        • CatBoost                                               │
+│        • Résultats: ROC-AUC ~0.94                              │
+│                                                                 │
+│  3. FINE-TUNING (RandomizedSearchCV)                           │
+│     └─ Optimisation automatique                                 │
+│        • 20 itérations × 3 CV par modèle                       │
+│        • 5-8 hyperparamètres optimisés                         │
+│        • Sélection des meilleurs paramètres                     │
+│        • Résultats: ROC-AUC ~0.96 (+2%)                        │
+│                                                                 │
+│  4. ENSEMBLE LEARNING                                           │
+│     └─ Stacking + Voting                                        │
+│        • Stacking: 4 modèles + meta-learner                    │
+│        • Voting: Soft voting sur probabilités                   │
+│        • Résultats: ROC-AUC ~0.97 (+3%)                        │
+│                                                                 │
+│  5. ÉVALUATION ET COMPARAISON                                   │
+│     └─ Analyses complètes                                       │
+│        • 10 configurations comparées                            │
+│        • Matrices de confusion                                  │
+│        • Courbes ROC                                            │
+│        • Analyse des améliorations                              │
+│                                                                 │
+│  6. SAUVEGARDE                                                  │
+│     └─ notebooks/processors/models/                            │
+│        • best_model_final.pkl                                   │
+│        • all_tuned_models.pkl                                   │
+│        • ensemble_models.pkl                                    │
+│        • Métadonnées et rapports                                │
+│                                                                 │
+│  7. INFÉRENCE (PRODUCTION)                                      │
+│     └─ backend/src/model_inference.py                          │
+│        • Chargement du meilleur modèle                          │
+│        • Prédictions sur nouvelles transactions                 │
+│        • API-ready                                              │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+</div></code></pre>
+<h3 id="commandes-s%C3%A9quentielles">Commandes Séquentielles</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># 1. Preprocessing</span>
+<span class="hljs-built_in">cd</span> backend/src/
+python preprocessing_fraud_class.py
+
+<span class="hljs-comment"># 2. Modélisation</span>
+<span class="hljs-built_in">cd</span> ../../notebooks/
+jupyter notebook fraud_detection_modeling.ipynb
+<span class="hljs-comment"># → Exécuter toutes les cellules</span>
+
+<span class="hljs-comment"># 3. Vérifier les résultats</span>
+ls -l processors/models/
+cat processors/modeling_report_final.txt
+
+<span class="hljs-comment"># 4. Tester l'inférence</span>
+<span class="hljs-built_in">cd</span> ../backend/src/
+python model_inference.py
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%93%8A-r%C3%A9sultats">📊 Résultats</h2>
+<h3 id="performances-typiques">Performances Typiques</h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>ROC-AUC</th>
+<th>F1-Score</th>
+<th>Recall</th>
+<th>Temps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Baseline</strong></td>
+<td>0.94</td>
+<td>0.87</td>
+<td>0.85</td>
+<td>2 min</td>
+</tr>
+<tr>
+<td><strong>Fine-Tuned</strong></td>
+<td>0.96</td>
+<td>0.90</td>
+<td>0.89</td>
+<td>20 min</td>
+</tr>
+<tr>
+<td><strong>Ensemble</strong></td>
+<td>0.97</td>
+<td>0.92</td>
+<td>0.91</td>
+<td>25 min</td>
+</tr>
+</tbody>
+</table>
+<h3 id="am%C3%A9lioration-globale">Amélioration Globale</h3>
+<pre class="hljs"><code><div>Baseline → Ensemble
+─────────────────────
+ROC-AUC:  0.94 → 0.97  (+3.2%)
+F1-Score: 0.87 → 0.92  (+5.7%)
+Recall:   0.85 → 0.91  (+7.1%)
+</div></code></pre>
+<h3 id="fichiers-g%C3%A9n%C3%A9r%C3%A9s">Fichiers Générés</h3>
+<p>Après exécution complète:</p>
+<pre class="hljs"><code><div>notebooks/processors/
+├── models/
+│   ├── best_model_final.pkl           (2-5 MB)
+│   ├── best_model_final_metadata.pkl  (10 KB)
+│   ├── all_tuned_models.pkl           (8-20 MB)
+│   └── ensemble_models.pkl            (10-25 MB)
+├── model_comparison_final.csv         (5 KB)
+├── model_improvements.csv             (2 KB)
+└── modeling_report_final.txt          (10 KB)
+</div></code></pre>
+<h3 id="exemple-de-rapport">Exemple de Rapport</h3>
+<pre class="hljs"><code><div>🏆 MEILLEUR MODÈLE GLOBAL: Stacking
+   Type: Ensemble
+   ROC-AUC:   0.9745
+   F1-Score:  0.9234
+   Recall:    0.9156
+   Precision: 0.9314
+
+📊 TOP 5 MODÈLES (PAR ROC-AUC)
+1. Stacking (Ensemble) - AUC: 0.9745
+2. XGBoost (Tuned) - AUC: 0.9687
+3. LightGBM (Tuned) - AUC: 0.9654
+4. CatBoost (Tuned) - AUC: 0.9623
+5. Random Forest (Tuned) - AUC: 0.9598
+
+💡 AMÉLIORATION GLOBALE
+   Baseline → Ensemble: +3.2% ROC-AUC
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%8F%97%EF%B8%8F-architecture">🏗️ Architecture</h2>
+<h3 id="technologies-utilis%C3%A9es">Technologies Utilisées</h3>
+<h4 id="core-ml">Core ML</h4>
+<ul>
+<li><strong>Scikit-learn</strong> 1.0+: Framework ML principal</li>
+<li><strong>XGBoost</strong> 1.5+: Gradient boosting optimisé</li>
+<li><strong>LightGBM</strong> 3.3+: Gradient boosting rapide</li>
+<li><strong>CatBoost</strong> 1.0+: Gradient boosting pour catégories</li>
+</ul>
+<h4 id="data-processing">Data Processing</h4>
+<ul>
+<li><strong>Pandas</strong> 1.3+: Manipulation de données</li>
+<li><strong>NumPy</strong> 1.21+: Calcul numérique</li>
+<li><strong>Imbalanced-learn</strong> 0.9+: SMOTE pour déséquilibre</li>
+</ul>
+<h4 id="visualization">Visualization</h4>
+<ul>
+<li><strong>Matplotlib</strong> 3.4+: Graphiques</li>
+<li><strong>Seaborn</strong> 0.11+: Visualisations statistiques</li>
+</ul>
+<h4 id="optimization">Optimization</h4>
+<ul>
+<li><strong>Scipy</strong> 1.7+: Distributions pour RandomizedSearchCV</li>
+</ul>
+<h3 id="architecture-du-mod%C3%A8le-final">Architecture du Modèle Final</h3>
+<pre class="hljs"><code><div>┌─────────────────────────────────────────────────┐
+│           STACKING ENSEMBLE (Meilleur)          │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  BASE LEARNERS (Level 0)                        │
+│  ┌─────────────┐  ┌─────────────┐              │
+│  │ Random      │  │  XGBoost    │              │
+│  │ Forest      │  │  (Tuned)    │              │
+│  │ (Tuned)     │  │             │              │
+│  └──────┬──────┘  └──────┬──────┘              │
+│         │                 │                     │
+│  ┌──────┴──────┐  ┌──────┴──────┐              │
+│  │  LightGBM   │  │  CatBoost   │              │
+│  │  (Tuned)    │  │  (Tuned)    │              │
+│  └──────┬──────┘  └──────┬──────┘              │
+│         │                 │                     │
+│         └────────┬────────┘                     │
+│                  ▼                              │
+│  META-LEARNER (Level 1)                         │
+│  ┌─────────────────────────┐                    │
+│  │  Logistic Regression    │                    │
+│  │  (Balanced)             │                    │
+│  └───────────┬─────────────┘                    │
+│              │                                  │
+│              ▼                                  │
+│         PREDICTION                              │
+│         (0 ou 1)                                │
+│                                                 │
+└─────────────────────────────────────────────────┘
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%9A%80-d%C3%A9ploiement">🚀 Déploiement</h2>
+<h3 id="utilisation-du-script-dinf%C3%A9rence">Utilisation du Script d'Inférence</h3>
+<p>Le script <code>model_inference.py</code> est dans <strong><code>backend/src/</code></strong> et est prêt pour la production.</p>
+<h4 id="import-et-initialisation">Import et Initialisation</h4>
+<pre class="hljs"><code><div><span class="hljs-comment"># backend/src/model_inference.py</span>
+<span class="hljs-keyword">from</span> model_inference <span class="hljs-keyword">import</span> FraudDetectionInference
+
+<span class="hljs-comment"># Initialiser le détecteur</span>
+detector = FraudDetectionInference(
+    processor_dir=<span class="hljs-string">'../../notebooks/processors'</span>
+)
+
+<span class="hljs-comment"># Charger le meilleur modèle</span>
+detector.load_model()
+</div></code></pre>
+<h4 id="pr%C3%A9diction-sur-une-transaction">Prédiction sur une Transaction</h4>
+<pre class="hljs"><code><div><span class="hljs-comment"># Transaction unique</span>
+transaction = {
+    <span class="hljs-string">'amt'</span>: <span class="hljs-number">125.50</span>,
+    <span class="hljs-string">'lat'</span>: <span class="hljs-number">40.7128</span>,
+    <span class="hljs-string">'long'</span>: <span class="hljs-number">-74.0060</span>,
+    <span class="hljs-string">'city_pop'</span>: <span class="hljs-number">8000000</span>,
+    <span class="hljs-comment"># ... autres features</span>
+}
+
+result = detector.predict_single(transaction)
+print(<span class="hljs-string">f"Fraude: <span class="hljs-subst">{result[<span class="hljs-string">'is_fraud'</span>]}</span>"</span>)
+print(<span class="hljs-string">f"Probabilité: <span class="hljs-subst">{result[<span class="hljs-string">'fraud_probability'</span>]:<span class="hljs-number">.2</span>%}</span>"</span>)
+print(<span class="hljs-string">f"Niveau de risque: <span class="hljs-subst">{result[<span class="hljs-string">'risk_level'</span>]}</span>"</span>)
+</div></code></pre>
+<p><strong>Sortie</strong>:</p>
+<pre class="hljs"><code><div>Fraude: 1
+Probabilité: 87.34%
+Niveau de risque: TRÈS ÉLEVÉ
+</div></code></pre>
+<h4 id="pr%C3%A9diction-sur-un-batch">Prédiction sur un Batch</h4>
+<pre class="hljs"><code><div><span class="hljs-comment"># Batch de transactions</span>
+<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+
+transactions_df = pd.read_csv(<span class="hljs-string">'new_transactions.csv'</span>)
+
+<span class="hljs-comment"># Prédictions avec détails</span>
+results_df = detector.predict_batch(
+    transactions_df,
+    threshold=<span class="hljs-number">0.5</span>,
+    return_details=<span class="hljs-literal">True</span>
+)
+
+<span class="hljs-comment"># Filtrer les fraudes détectées</span>
+frauds = results_df[results_df[<span class="hljs-string">'is_fraud_predicted'</span>] == <span class="hljs-number">1</span>]
+print(<span class="hljs-string">f"Fraudes détectées: <span class="hljs-subst">{len(frauds)}</span>"</span>)
+</div></code></pre>
+<h3 id="int%C3%A9gration-dans-une-api-flask">Intégration dans une API Flask</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># backend/src/api.py</span>
+<span class="hljs-keyword">from</span> flask <span class="hljs-keyword">import</span> Flask, request, jsonify
+<span class="hljs-keyword">from</span> model_inference <span class="hljs-keyword">import</span> FraudDetectionInference
+
+app = Flask(__name__)
+detector = FraudDetectionInference()
+detector.load_model()
+
+<span class="hljs-meta">@app.route('/predict', methods=['POST'])</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">predict</span><span class="hljs-params">()</span>:</span>
+    data = request.json
+    result = detector.predict_single(data)
+    <span class="hljs-keyword">return</span> jsonify(result)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
+    app.run(host=<span class="hljs-string">'0.0.0.0'</span>, port=<span class="hljs-number">5000</span>)
+</div></code></pre>
+<h3 id="int%C3%A9gration-dans-une-api-fastapi">Intégration dans une API FastAPI</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># backend/src/api_fast.py</span>
+<span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI
+<span class="hljs-keyword">from</span> pydantic <span class="hljs-keyword">import</span> BaseModel
+<span class="hljs-keyword">from</span> model_inference <span class="hljs-keyword">import</span> FraudDetectionInference
+
+app = FastAPI()
+detector = FraudDetectionInference()
+detector.load_model()
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Transaction</span><span class="hljs-params">(BaseModel)</span>:</span>
+    amt: float
+    lat: float
+    long: float
+    <span class="hljs-comment"># ... autres champs</span>
+
+<span class="hljs-meta">@app.post("/predict")</span>
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">predict</span><span class="hljs-params">(transaction: Transaction)</span>:</span>
+    result = detector.predict_single(transaction.dict())
+    <span class="hljs-keyword">return</span> result
+</div></code></pre>
+<h3 id="dockerisation">Dockerisation</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Dockerfile</span>
+<span class="hljs-keyword">FROM</span> python:<span class="hljs-number">3.8</span>-slim
+
+<span class="hljs-keyword">WORKDIR</span><span class="bash"> /app</span>
+
+<span class="hljs-comment"># Copier requirements</span>
+<span class="hljs-keyword">COPY</span><span class="bash"> requirements.txt .</span>
+<span class="hljs-keyword">RUN</span><span class="bash"> pip install --no-cache-dir -r requirements.txt</span>
+
+<span class="hljs-comment"># Copier le code</span>
+<span class="hljs-keyword">COPY</span><span class="bash"> backend/ backend/</span>
+<span class="hljs-keyword">COPY</span><span class="bash"> notebooks/processors/ notebooks/processors/</span>
+
+<span class="hljs-comment"># Exposer le port</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">5000</span>
+
+<span class="hljs-comment"># Lancer l'API</span>
+<span class="hljs-keyword">CMD</span><span class="bash"> [<span class="hljs-string">"python"</span>, <span class="hljs-string">"backend/src/api.py"</span>]</span>
+</div></code></pre>
+<h3 id="tests-unitaires">Tests Unitaires</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># tests/test_inference.py</span>
+<span class="hljs-keyword">import</span> unittest
+<span class="hljs-keyword">from</span> backend.src.model_inference <span class="hljs-keyword">import</span> FraudDetectionInference
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestInference</span><span class="hljs-params">(unittest.TestCase)</span>:</span>
+    
+<span class="hljs-meta">    @classmethod</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">setUpClass</span><span class="hljs-params">(cls)</span>:</span>
+        cls.detector = FraudDetectionInference()
+        cls.detector.load_model()
+    
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_load_model</span><span class="hljs-params">(self)</span>:</span>
+        self.assertIsNotNone(self.detector.model)
+    
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_predict_single</span><span class="hljs-params">(self)</span>:</span>
+        transaction = {...}  <span class="hljs-comment"># Transaction test</span>
+        result = self.detector.predict_single(transaction)
+        self.assertIn(<span class="hljs-string">'is_fraud'</span>, result)
+        self.assertIn(<span class="hljs-string">'fraud_probability'</span>, result)
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%93%88-monitoring-et-maintenance">📈 Monitoring et Maintenance</h2>
+<h3 id="m%C3%A9triques-%C3%A0-suivre">Métriques à Suivre</h3>
+<table>
+<thead>
+<tr>
+<th>Métrique</th>
+<th>Seuil Critique</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ROC-AUC</td>
+<td>&lt; 0.90</td>
+<td>Réentraîner</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>&lt; 0.85</td>
+<td>Ajuster seuil</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td>&lt; 0.80</td>
+<td>Réviser features</td>
+</tr>
+<tr>
+<td>Temps inférence</td>
+<td>&gt; 100ms</td>
+<td>Optimiser</td>
+</tr>
+</tbody>
+</table>
+<h3 id="r%C3%A9entra%C3%AEnement">Réentraînement</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Mensuel ou lorsque performance &lt; seuil</span>
+<span class="hljs-built_in">cd</span> backend/src/
+python preprocessing_fraud_class.py  <span class="hljs-comment"># Nouvelles données</span>
+
+<span class="hljs-built_in">cd</span> ../../notebooks/
+jupyter nbconvert --execute fraud_detection_modeling_advanced.ipynb
+</div></code></pre>
+<h3 id="logs-et-alertes">Logs et Alertes</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># backend/src/monitoring.py</span>
+<span class="hljs-keyword">import</span> logging
+
+logging.basicConfig(
+    filename=<span class="hljs-string">'fraud_detection.log'</span>,
+    level=logging.INFO,
+    format=<span class="hljs-string">'%(asctime)s - %(levelname)s - %(message)s'</span>
+)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">log_prediction</span><span class="hljs-params">(transaction_id, prediction, probability)</span>:</span>
+    logging.info(<span class="hljs-string">f"ID: <span class="hljs-subst">{transaction_id}</span> | Pred: <span class="hljs-subst">{prediction}</span> | Prob: <span class="hljs-subst">{probability:<span class="hljs-number">.4</span>f}</span>"</span>)
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%94%A7-configuration-avanc%C3%A9e">🔧 Configuration Avancée</h2>
+<h3 id="personnalisation-des-hyperparam%C3%A8tres">Personnalisation des Hyperparamètres</h3>
+<p>Dans le notebook, cellule &quot;5.1 Définition des Hyperparamètres&quot;:</p>
+<pre class="hljs"><code><div>param_distributions = {
+    <span class="hljs-string">'XGBoost'</span>: {
+        <span class="hljs-string">'n_estimators'</span>: [<span class="hljs-number">100</span>, <span class="hljs-number">200</span>, <span class="hljs-number">300</span>, <span class="hljs-number">400</span>, <span class="hljs-number">500</span>],  <span class="hljs-comment"># Ajouter plus de valeurs</span>
+        <span class="hljs-string">'max_depth'</span>: [<span class="hljs-number">3</span>, <span class="hljs-number">5</span>, <span class="hljs-number">7</span>, <span class="hljs-number">9</span>, <span class="hljs-number">11</span>],
+        <span class="hljs-string">'learning_rate'</span>: [<span class="hljs-number">0.01</span>, <span class="hljs-number">0.05</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">0.15</span>, <span class="hljs-number">0.2</span>],
+        <span class="hljs-comment"># ... personnaliser selon besoins</span>
+    }
+}
+</div></code></pre>
+<h3 id="ajuster-le-seuil-de-d%C3%A9cision">Ajuster le Seuil de Décision</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Dans model_inference.py ou en post-traitement</span>
+optimal_threshold = <span class="hljs-number">0.3</span>  <span class="hljs-comment"># Plus de détections (+ Recall, - Precision)</span>
+<span class="hljs-comment"># ou</span>
+optimal_threshold = <span class="hljs-number">0.7</span>  <span class="hljs-comment"># Moins de fausses alertes (- Recall, + Precision)</span>
+
+result = detector.predict_single(transaction, threshold=optimal_threshold)
+</div></code></pre>
+<h3 id="utiliser-gridsearchcv-recherche-exhaustive">Utiliser GridSearchCV (Recherche Exhaustive)</h3>
+<p>Pour le meilleur modèle identifié:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> GridSearchCV
+
+param_grid = {
+    <span class="hljs-string">'n_estimators'</span>: [<span class="hljs-number">280</span>, <span class="hljs-number">300</span>, <span class="hljs-number">320</span>],
+    <span class="hljs-string">'max_depth'</span>: [<span class="hljs-number">7</span>, <span class="hljs-number">8</span>, <span class="hljs-number">9</span>],
+    <span class="hljs-string">'learning_rate'</span>: [<span class="hljs-number">0.08</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">0.12</span>]
+}
+
+grid_search = GridSearchCV(
+    XGBClassifier(...),
+    param_grid,
+    cv=<span class="hljs-number">5</span>,
+    scoring=<span class="hljs-string">'roc_auc'</span>,
+    n_jobs=<span class="hljs-number">-1</span>,
+    verbose=<span class="hljs-number">2</span>
+)
+
+grid_search.fit(X_train, y_train)
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%90%9B-d%C3%A9pannage">🐛 Dépannage</h2>
+<h3 id="probl%C3%A8mes-courants">Problèmes Courants</h3>
+<h4 id="1-modulenotfounderror">1. <code>ModuleNotFoundError</code></h4>
+<p><strong>Cause</strong>: Dépendances non installées</p>
+<p><strong>Solution</strong>:</p>
+<pre class="hljs"><code><div>pip install -r requirements.txt
+</div></code></pre>
+<h4 id="2-filenotfounderror-preprocesseddatapkl">2. <code>FileNotFoundError: preprocessed_data.pkl</code></h4>
+<p><strong>Cause</strong>: Preprocessing non exécuté</p>
+<p><strong>Solution</strong>:</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">cd</span> backend/src/
+python preprocessing_fraud_class.py
+</div></code></pre>
+<h4 id="3-memoryerror-pendant-le-fine-tuning">3. <code>MemoryError</code> pendant le fine-tuning</h4>
+<p><strong>Cause</strong>: RAM insuffisante</p>
+<p><strong>Solution</strong>: Réduire <code>n_iter</code> et <code>cv</code></p>
+<pre class="hljs"><code><div>n_iter=<span class="hljs-number">5</span>,   <span class="hljs-comment"># Au lieu de 20</span>
+cv=<span class="hljs-number">2</span>        <span class="hljs-comment"># Au lieu de 3</span>
+</div></code></pre>
+<h4 id="4-le-notebook-est-tr%C3%A8s-lent">4. Le notebook est très lent</h4>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Réduire <code>n_estimators</code> dans les modèles</li>
+<li>Utiliser moins d'itérations pour RandomizedSearchCV</li>
+<li>Fermer d'autres applications</li>
+<li>Utiliser un échantillon des données</li>
+</ul>
+<h4 id="5-erreur-lors-du-chargement-du-mod%C3%A8le">5. Erreur lors du chargement du modèle</h4>
+<p><strong>Cause</strong>: Versions de packages incompatibles</p>
+<p><strong>Solution</strong>:</p>
+<pre class="hljs"><code><div>pip install --upgrade scikit-learn xgboost lightgbm catboost
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%93%9A-documentation-suppl%C3%A9mentaire">📚 Documentation Supplémentaire</h2>
+<h3 id="fichiers-de-documentation">Fichiers de Documentation</h3>
+<ul>
+<li><strong>README_MODELING.md</strong>: Documentation détaillée du notebook</li>
+</ul>
+<h3 id="ressources-externes">Ressources Externes</h3>
+<ul>
+<li><a href="https://scikit-learn.org/stable/">Scikit-learn Documentation</a></li>
+<li><a href="https://xgboost.readthedocs.io/">XGBoost Documentation</a></li>
+<li><a href="https://lightgbm.readthedocs.io/">LightGBM Documentation</a></li>
+<li><a href="https://catboost.ai/docs/">CatBoost Documentation</a></li>
+<li><a href="https://imbalanced-learn.org/">Imbalanced-learn Documentation</a></li>
+</ul>
+<hr>
+<h2 id="%F0%9F%93%9D-changelog">📝 Changelog</h2>
+<h3 id="version-10-novembre-2025">Version 1.0 (Novembre 2025)</h3>
+<ul>
+<li>✅ Implémentation complète du pipeline</li>
+<li>✅ 4 modèles de base + ensembles</li>
+<li>✅ Fine-tuning automatisé</li>
+<li>✅ Stacking et Voting</li>
+<li>✅ Script d'inférence production-ready</li>
+<li>✅ Documentation exhaustive</li>
+</ul>
+<hr>
+<h2 id="%F0%9F%91%A5-%C3%A9quipe">👥 Équipe</h2>
+<p><strong>Projet MLOps 2025 - 3 IDSD ID</strong></p>
+<p>Made with ❤️ by 3 IDSD ID Team</p>
+</div>
+
+</body>
+</html>

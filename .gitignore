@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# DVC
+.dvc/tmp
+.dvc/cache
+
+# Docker
+*.log
+
+# Jenkins
+jenkins_home/
+
+# Modèles ML - Jenkins les copiera depuis notebooks/model_registry/
+backend/src/processors/models/*.pkl
+backend/src/processors/*.pkl
+
+# IMPORTANT: Garder le model_registry pour Jenkins
+# notebooks/model_registry/ est VERSION CONTROLÉ
+# backend/src/processors/models/ est GÉNÉRÉ par Jenkins
+
+# Garder les dossiers vides
+!backend/src/processors/models/.gitkeep
+!backend/src/processors/.gitkeep
+
+# Données volumineuses
+*.csv
+*.parquet
+data/raw/
+data/processed/
+
+# Exceptions - Fichiers à garder
+!notebooks/processors/preprocessor.pkl
+!notebooks/processors/feature_names.pkl
+!notebooks/processors/preprocessing_strategy.pkl
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Monitoring
+monitoring/*.html
+monitoring/*.json

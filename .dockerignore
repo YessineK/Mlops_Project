@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints
+
+# Large data files
+notebooks/processors/all_results.pkl
+notebooks/processors/all_results_final.pkl
+notebooks/processors/preprocessed_data.pkl
+data/
+
+# OS
+.DS_Store
