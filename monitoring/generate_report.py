@@ -23,6 +23,11 @@ def generate_report():
     print("Loading data...")
     reference_data = pd.read_csv(ref_path)
     current_data = pd.read_csv(curr_path)
+
+    # Drop ID column (not useful for drift monitoring)
+    for df in (reference_data, current_data):
+        if 'CLIENTNUM' in df.columns:
+            df.drop(columns=['CLIENTNUM'], inplace=True)
     
     # Sample data for faster processing (optional)
     # reference_data = reference_data.sample(n=min(10000, len(reference_data)), random_state=42)
@@ -50,12 +55,12 @@ def generate_report():
     print("Running Test Suite...")
     
     # For legacy TestSuite, we can use column_mapping
-    column_mapping = None
-    if 'is_fraud' in reference_data.columns:
-        from evidently.legacy.pipeline.column_mapping import ColumnMapping
-        column_mapping = ColumnMapping()
-        column_mapping.target = 'is_fraud'
-    
+    from evidently.legacy.pipeline.column_mapping import ColumnMapping
+
+    column_mapping = ColumnMapping()
+    # Target churn (bank)
+    column_mapping.target = 'Attrition_Flag'   
+
     tests = TestSuite(tests=[
         DataDriftTestPreset(),
     ])
