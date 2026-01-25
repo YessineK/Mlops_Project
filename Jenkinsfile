@@ -58,16 +58,22 @@ pipeline {
         stage('🐍 Setup Python') {
             steps {
                 script {
-                    echo '🐍 Vérification de Python...'
+                    echo '🐍 Installation des dépendances Python...'
                     sh '''
                         if command -v python3 &> /dev/null; then
                             echo "✅ Python3 trouvé"
                             python3 --version
+                            
+                            echo "📦 Installation des packages Python..."
+                            pip3 install --break-system-packages \
+                                imbalanced-learn \
+                                scikit-learn \
+                                pandas \
+                                numpy \
+                                lightgbm || true
                         else
-                            echo "⚠️ Python3 non trouvé, installation..."
-                            apt-get update
-                            apt-get install -y python3 python3-pip
-                            python3 --version
+                            echo "❌ Python3 non trouvé"
+                            exit 1
                         fi
                     '''
                 }
