@@ -57,12 +57,20 @@ pipeline {
         
         stage('🐍 Setup Python') {
             steps {
-                echo '🐍 Installation des dépendances Python...'
-                sh '''
-                    python3 --version
-                    pip3 install --upgrade pip
-                    echo "✅ Python configuré"
-                '''
+                script {
+                    echo '🐍 Vérification de Python...'
+                    sh '''
+                        if command -v python3 &> /dev/null; then
+                            echo "✅ Python3 trouvé"
+                            python3 --version
+                        else
+                            echo "⚠️ Python3 non trouvé, installation..."
+                            apt-get update
+                            apt-get install -y python3 python3-pip
+                            python3 --version
+                        fi
+                    '''
+                }
             }
         }
         
