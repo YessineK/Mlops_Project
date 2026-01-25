@@ -2,9 +2,9 @@ pipeline {
     agent any
     
     environment {
-        // Docker Hub credentials - CORRIGÉ
-        DOCKER_HUB_USERNAME = 'yessinekarray'  // ← CHANGÉ ICI !
-        DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-credentials'
+        // Docker Hub credentials
+        DOCKER_HUB_USERNAME = 'yessinekarray'
+        DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-credentials'  // ← CORRIGÉ : d minuscule
         
         // Image names
         BACKEND_IMAGE = "${DOCKER_HUB_USERNAME}/churn-backend"
@@ -201,7 +201,7 @@ pipeline {
                     echo '📤 Push des images vers Docker Hub...'
                     
                     withCredentials([usernamePassword(
-                        credentialsId: 'Ddocker-hub-credentials',
+                        credentialsId: 'docker-hub-credentials',  // ← CORRIGÉ : d minuscule
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_PASS'
                     )]) {
