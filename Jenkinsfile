@@ -4,7 +4,7 @@ pipeline {
     environment {
         // Docker Hub credentials
         DOCKER_HUB_USERNAME = 'yessinekarray'
-        DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-credentials'  
+	DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-credentials'
         
         // Image names
         BACKEND_IMAGE = "${DOCKER_HUB_USERNAME}/churn-backend"
