@@ -2,9 +2,9 @@ pipeline {
     agent any
     
     environment {
-        // Docker Hub credentials
-        DOCKER_HUB_USERNAME = 'karrayyessine1'
-        DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-credentials'
+        // Docker Hub credentials - CORRIGÉ
+        DOCKER_HUB_USERNAME = 'yessinekarray'  // ← CHANGÉ ICI !
+        DOCKER_HUB_CREDENTIALS_ID = 'Ddocker-hub-credentials'
         
         // Image names
         BACKEND_IMAGE = "${DOCKER_HUB_USERNAME}/churn-backend"
@@ -201,7 +201,7 @@ pipeline {
                     echo '📤 Push des images vers Docker Hub...'
                     
                     withCredentials([usernamePassword(
-                        credentialsId: env.DOCKER_HUB_CREDENTIALS_ID,
+                        credentialsId: 'Ddocker-hub-credentials',
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_PASS'
                     )]) {
@@ -348,12 +348,6 @@ pipeline {
                 echo '❌❌❌ PIPELINE ÉCHOUÉ! ❌❌❌'
                 echo ''
                 echo '🔍 Vérifiez les logs ci-dessus pour identifier l\'erreur'
-                echo ''
-                echo '💡 Erreurs communes:'
-                echo '   - Credentials Docker Hub incorrects'
-                echo '   - Modèle ML non trouvé'
-                echo '   - Dockerfile manquant'
-                echo '   - Port déjà utilisé'
             }
         }
         
@@ -367,7 +361,7 @@ pipeline {
                     docker image prune -f || true
                 '''
                 
-                echo "📊 Build ${BUILD_TAG} terminé"
+                echo "📊 Build terminé"
             }
         }
     }
