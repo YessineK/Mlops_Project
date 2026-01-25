@@ -28,7 +28,7 @@ pipeline {
             steps {
                 echo '📥 Clone du repository GitHub...'
                 git branch: 'main',
-                    url: 'https://github.com/karrayyessine1/churn-mlops.git'
+                    url: 'https://github.com/YessineK/Mlops_Project.git'
                 echo '✅ Repository cloné'
             }
         }
