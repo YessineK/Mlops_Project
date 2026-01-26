@@ -102,6 +102,7 @@ pipeline {
                 '''
             }
         }
+
         stage('🧪 Deepchecks Validation') {
             steps {
                 echo '🧪 Validation qualité du modèle avec Deepchecks...'
@@ -160,29 +161,6 @@ pipeline {
                         echo "⚠️ Certains rapports Deepchecks n'ont pas pu être archivés"
                     }
                 }
-            }
-        }
-        stage('📄 Archive Deepchecks Reports') {
-            steps {
-                echo '📄 Archivage des rapports Deepchecks...'
-                
-                archiveArtifacts artifacts: 'testing/deepchecks_summary.html',
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                archiveArtifacts artifacts: 'testing/data_integrity_report.html',
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                archiveArtifacts artifacts: 'testing/train_test_validation_report.html',
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                archiveArtifacts artifacts: 'testing/model_evaluation_report.html',
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                echo '✅ Rapports Deepchecks archivés'
             }
         }
         stage('🔍 Validate Model Files') {
