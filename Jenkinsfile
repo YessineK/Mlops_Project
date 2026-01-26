@@ -108,8 +108,13 @@ pipeline {
                 sh '''
                     set +e  # Ne pas arrêter sur erreur
                     
-                    echo "📦 Installation de Deepchecks avec scikit-learn compatible..."
-                    pip3 install --break-system-packages "scikit-learn==1.5.2" setuptools deepchecks
+                    echo "📦 Installation de Deepchecks avec NumPy compatible..."
+                    pip3 install --break-system-packages "numpy<2.0" setuptools deepchecks
+                    
+                    echo ""
+                    echo "🔍 Vérification des versions..."
+                    python3 -c "import numpy; print(f'NumPy: {numpy.__version__}')"
+                    python3 -c "import deepchecks; print(f'Deepchecks: {deepchecks.__version__}')"
                     
                     echo ""
                     echo "🔍 Exécution de Deepchecks..."
