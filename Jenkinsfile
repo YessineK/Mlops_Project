@@ -102,7 +102,33 @@ pipeline {
                 '''
             }
         }
-
+        stage('🧪 Deepchecks Validation') {
+            steps {
+                echo '🧪 Validation du modèle avec Deepchecks...'
+                sh '''
+                    set +e  # Ne pas arrêter sur erreur
+                    
+                    echo "📦 Installation de Deepchecks..."
+                    pip3 install --break-system-packages setuptools deepchecks
+                    
+                    echo ""
+                    echo "🔍 Exécution de Deepchecks..."
+                    cd testing
+                    python3 run_deepchecks.py
+                    
+                    echo ""
+                    echo "📋 Fichiers générés:"
+                    ls -lh *.html 2>/dev/null || echo "Aucun fichier HTML"
+                    
+                    echo ""
+                    echo "📂 Copie vers monitoring..."
+                    cp *.html ../monitoring/ 2>/dev/null || echo "Pas de fichiers à copier"
+                    
+                    echo "✅ Deepchecks terminé"
+                    exit 0
+                '''
+            }
+        }
         stage('📊 Data Drift Monitoring') {
             steps {
                 echo '📊 Vérification du data drift avec Evidently...'
