@@ -107,58 +107,38 @@ pipeline {
             steps {
                 echo '🧪 Validation qualité du modèle avec Deepchecks...'
                 script {
-                    def deepchecksStatus = sh(
-                        script: '''
-                            echo "📦 Installation de Deepchecks et dépendances..."
-                            pip3 install --break-system-packages setuptools deepchecks || true
-                            
-                            echo ""
-                            echo "🔍 Exécution des tests de validation..."
-                            cd testing
-                            python3 run_deepchecks.py || echo "⚠️ Deepchecks a échoué, mais on continue..."
-                            
-                            echo ""
-                            echo "✅ Validation Deepchecks terminée"
-                        ''',
-                        returnStatus: true
-                    )
-                    
-                    if (deepchecksStatus != 0) {
-                        echo "⚠️⚠️⚠️ ATTENTION: Deepchecks a détecté des problèmes ⚠️⚠️⚠️"
-                        echo "📊 Consultez les rapports pour plus de détails"
-                    } else {
-                        echo "✅ Deepchecks: Aucun problème détecté"
-                    }
+                    sh '''
+                        echo "📦 Installation de Deepchecks..."
+                        pip3 install --break-system-packages setuptools deepchecks || true
+                        
+                        echo ""
+                        echo "🔍 Exécution des tests de validation..."
+                        cd testing
+                        python3 run_deepchecks.py || echo "⚠️ Deepchecks a rencontré des problèmes"
+                        
+                        echo ""
+                        echo "📋 Copie du rapport vers monitoring/..."
+                        cp deepchecks_report.html ../monitoring/ || true
+                        
+                        echo "✅ Validation Deepchecks terminée"
+                    '''
                 }
             }
         }
 
-        stage('📄 Archive Deepchecks Reports') {
+        stage('📄 Archive Deepchecks Report') {
             steps {
-                echo '📄 Archivage des rapports Deepchecks...'
+                echo '📄 Archivage du rapport Deepchecks...'
                 
-                // Archive TOUJOURS les rapports, même si Deepchecks a échoué
                 script {
                     try {
-                        archiveArtifacts artifacts: 'testing/deepchecks_summary.html',
+                        archiveArtifacts artifacts: 'testing/deepchecks_report.html',
                                         allowEmptyArchive: true,
                                         fingerprint: true
                         
-                        archiveArtifacts artifacts: 'testing/data_integrity_report.html',
-                                        allowEmptyArchive: true,
-                                        fingerprint: true
-                        
-                        archiveArtifacts artifacts: 'testing/train_test_validation_report.html',
-                                        allowEmptyArchive: true,
-                                        fingerprint: true
-                        
-                        archiveArtifacts artifacts: 'testing/model_evaluation_report.html',
-                                        allowEmptyArchive: true,
-                                        fingerprint: true
-                        
-                        echo '✅ Rapports Deepchecks archivés'
+                        echo '✅ Rapport Deepchecks archivé'
                     } catch (Exception e) {
-                        echo "⚠️ Certains rapports Deepchecks n'ont pas pu être archivés"
+                        echo "⚠️ Le rapport n'a pas pu être archivé"
                     }
                 }
             }

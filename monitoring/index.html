@@ -5,89 +5,162 @@
     <title>Monitoring Dashboard</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 1100px;
+            margin: 0 auto;
             background: #0b0f17;
             color: #e8eefc;
-            padding: 20px;
+            padding: 40px 20px;
         }
         h1 { 
             color: #1db954; 
             margin-bottom: 10px;
+            font-size: 36px;
         }
         .subtitle {
             color: #9fb0d0;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            font-size: 18px;
         }
-        .main-report {
-            background: #121a27;
-            border: 2px solid #1db954;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
         }
-        .main-report h2 {
+        .card {
+            background: linear-gradient(135deg, #121a27 0%, #1a2332 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+        }
+        .card h2 {
             margin-top: 0;
-            color: #1db954;
+            font-size: 24px;
+            margin-bottom: 10px;
         }
-        .main-report a {
+        .card.monitoring h2 { color: #1db954; }
+        .card.validation h2 { color: #5e72e4; }
+        .card .desc {
+            color: #9fb0d0;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .card a {
             display: inline-block;
-            padding: 12px 24px;
+            padding: 12px 28px;
             background: #1db954;
             color: white;
             text-decoration: none;
             border-radius: 8px;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 16px;
+            transition: background 0.2s;
         }
-        .main-report a:hover {
+        .card.validation a {
+            background: #5e72e4;
+        }
+        .card a:hover {
             background: #1ed760;
+        }
+        .card.validation a:hover {
+            background: #7889f4;
+        }
+        .section-title {
+            color: #e8eefc;
+            font-size: 20px;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
         }
         .report-list {
             list-style: none;
             padding: 0;
         }
         .report-list li {
-            margin: 15px 0;
+            margin: 12px 0;
             padding: 15px;
             background: #121a27;
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: background 0.2s;
         }
-        a {
+        .report-list li:hover {
+            background: #1a2332;
+        }
+        .report-list a {
             color: #1db954;
             text-decoration: none;
             font-size: 16px;
+            font-weight: 500;
         }
-        a:hover { 
+        .report-list a:hover { 
             text-decoration: underline; 
         }
-        .desc {
+        .report-list .desc {
             color: #9fb0d0;
-            font-size: 14px;
+            font-size: 13px;
             margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>📊 Monitoring Dashboard</h1>
-    <div class="subtitle">MLOps Project - Churn Prediction</div>
+    <h1>📊 MLOps Monitoring Dashboard</h1>
+    <div class="subtitle">Churn Prediction - Model Quality & Performance</div>
     
+    <!-- RAPPORTS PRINCIPAUX -->
+    <div class="grid">
+        <div class="card monitoring">
+            <h2>📊 Production Monitoring</h2>
+            <div class="desc">
+                Surveillance en temps réel de la performance du modèle en production.
+                Détection de drift et analyse des métriques.
+            </div>
+            <a href="combined_report.html">📊 Ouvrir le Rapport</a>
+        </div>
+        
+        <div class="card validation">
+            <h2>🔍 Model Validation</h2>
+            <div class="desc">
+                Tests de qualité du modèle et validation des données.
+                Suite complète Deepchecks pour garantir la fiabilité.
+            </div>
+            <a href="deepchecks_report.html">🔍 Ouvrir le Rapport</a>
+        </div>
+    </div>
 
-    <h2>📄 Rapports </h2>
+    <!-- RAPPORTS DÉTAILLÉS -->
+    <div class="section-title">📈 Rapports Détaillés</div>
     <ul class="report-list">
         <li>
-            <a href="monitoring_report.html">📈 Data Drift Report  </a>
-            <div class="desc">Analyse du drift des données entre référence et production</div>
+            <a href="monitoring_report.html">📈 Data Drift Report (Evidently)</a>
+            <div class="desc">Analyse détaillée du drift des features entre référence et production</div>
         </li>
         <li>
             <a href="performance_report.html">🎯 Model Performance Report</a>
-            <div class="desc">Métriques de performance du modèle (accuracy, precision, recall, F1, AUC)</div>
+            <div class="desc">Métriques de performance : accuracy, precision, recall, F1, ROC-AUC</div>
         </li>
- 
         <li>
-            <a href="performance_metrics.json">📄 Performance Metrics (JSON)</a>
+            <a href="deepchecks_report.html">🔍 Deepchecks Full Validation</a>
+            <div class="desc">Suite complète de tests : intégrité des données, train-test validation, évaluation du modèle</div>
+        </li>
+    </ul>
+    
+    <div class="section-title">📄 Données Brutes (JSON)</div>
+    <ul class="report-list">
+        <li>
+            <a href="monitoring_tests.json">📄 Drift Tests Results</a>
+            <div class="desc">Résultats des tests de drift au format JSON</div>
+        </li>
+        <li>
+            <a href="performance_metrics.json">📄 Performance Metrics</a>
             <div class="desc">Métriques de performance au format JSON</div>
         </li>
     </ul>
