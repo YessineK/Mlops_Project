@@ -107,21 +107,79 @@ pipeline {
             steps {
                 echo '🧪 Validation qualité du modèle avec Deepchecks...'
                 script {
+                    def deepchecksStatus = sh(
+                        script: '''
+                            set +e  # Ne pas arrêter sur erreur
+                            
+                            echo "📦 Installation de Deepchecks et dépendances..."
+                            pip3 install --break-system-packages setuptools deepchecks 2>&1
+                            
+                            echo ""
+                            echo "🔍 Exécution des tests de validation..."
+                            cd testing
+                            
+                            # Exécuter et capturer le code de sortie
+                            python3 run_deepchecks.py
+                            EXIT_CODE=$?
+                            
+                            echo ""
+                            echo "Exit code: $EXIT_CODE"
+                            
+                            # Vérifier que les fichiers ont été créés
+                            echo "📋 Fichiers générés:"
+                            ls -lh *.html 2>/dev/null || echo "Aucun fichier HTML trouvé"
+                            
+                            # Toujours retourner 0 pour ne pas bloquer
+                            exit 0
+                        ''',
+                        returnStatus: true
+                    )
+                    
+                    echo "✅ Deepchecks terminé (status: ${deepchecksStatus})"
+                }
+            }
+        }
+
+        stage('📄 Copy & Archive Reports') {
+            steps {
+                echo '📄 Copie et archivage des rapports...'
+                
+                script {
+                    // Copier les rapports Deepchecks vers monitoring/
                     sh '''
-                        echo "📦 Installation de Deepchecks..."
-                        pip3 install --break-system-packages setuptools deepchecks || true
+                        echo "📋 Copie des rapports Deepchecks..."
+                        cp testing/*.html monitoring/ 2>/dev/null || echo "⚠️ Pas de rapports HTML Deepchecks"
                         
-                        echo ""
-                        echo "🔍 Exécution des tests de validation..."
-                        cd testing
-                        python3 run_deepchecks.py || echo "⚠️ Deepchecks a rencontré des problèmes"
-                        
-                        echo ""
-                        echo "📋 Copie du rapport vers monitoring/..."
-                        cp deepchecks_report.html ../monitoring/ || true
-                        
-                        echo "✅ Validation Deepchecks terminée"
+                        echo "✅ Copie terminée"
                     '''
+                    
+                    try {
+                        // Archive Evidently
+                        archiveArtifacts artifacts: 'monitoring/combined_report.html',
+                                        allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'monitoring/monitoring_report.html',
+                                        allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'monitoring/monitoring_tests.json',
+                                        allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'monitoring/performance_report.html',
+                                        allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'monitoring/performance_metrics.json',
+                                        allowEmptyArchive: true
+                        
+                        // Archive Deepchecks
+                        archiveArtifacts artifacts: 'monitoring/deepchecks_summary.html',
+                                        allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'monitoring/data_integrity_report.html',
+                                        allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'monitoring/train_test_validation_report.html',
+                                        allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'monitoring/model_evaluation_report.html',
+                                        allowEmptyArchive: true
+                        
+                        echo '✅ Tous les rapports archivés'
+                    } catch (Exception e) {
+                        echo "⚠️ Erreur d'archivage: ${e.message}"
+                    }
                 }
             }
         }
@@ -167,32 +225,6 @@ pipeline {
                     else
                         echo "⚠️  WARNING: Preprocessor non trouvé"
                     fi
-                '''
-            }
-        }
-
-        stage('📊 Data Drift Monitoring') {
-            steps {
-                echo '📊 Vérification du data drift avec Evidently...'
-                sh '''
-                    echo "📦 Installation d'Evidently..."
-                    pip3 install --break-system-packages evidently || true
-                    
-                    echo ""
-                    echo "📂 Préparation des données..."
-                    cd monitoring
-                    python3 prepare_data.py
-                    
-                    echo ""
-                    echo "📊 Génération du rapport de monitoring..."
-                    python3 run_monitoring.py
-                    
-                    echo ""
-                    echo "🔗 Combinaison des rapports..."
-                    python3 combine_reports.py
-                    
-                    echo ""
-                    echo "✅ Monitoring terminé"
                 '''
             }
         }

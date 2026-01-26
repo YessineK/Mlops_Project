@@ -2,167 +2,277 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Monitoring Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MLOps Monitoring Dashboard</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            max-width: 1100px;
-            margin: 0 auto;
-            background: #0b0f17;
+            background: linear-gradient(135deg, #0b0f17 0%, #1a1f2e 100%);
             color: #e8eefc;
+            min-height: 100vh;
             padding: 40px 20px;
         }
-        h1 { 
-            color: #1db954; 
-            margin-bottom: 10px;
-            font-size: 36px;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        h1 {
+            font-size: 42px;
+            color: #1db954;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
         .subtitle {
-            color: #9fb0d0;
-            margin-bottom: 40px;
             font-size: 18px;
+            color: #9fb0d0;
+            margin-bottom: 30px;
         }
-        .grid {
+        
+        .section-title {
+            font-size: 28px;
+            color: #e8eefc;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1db954;
+        }
+        
+        .reports-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
             margin-bottom: 40px;
         }
-        .card {
-            background: linear-gradient(135deg, #121a27 0%, #1a2332 100%);
-            border: 1px solid rgba(255,255,255,0.1);
+        
+        .report-card {
+            background: linear-gradient(145deg, #121a27 0%, #1a2332 100%);
+            border: 1px solid rgba(29, 185, 84, 0.3);
             border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .card:hover {
+        
+        .report-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1db954 0%, #1ed760 100%);
+        }
+        
+        .report-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+            box-shadow: 0 10px 30px rgba(29, 185, 84, 0.2);
+            border-color: #1db954;
         }
-        .card h2 {
-            margin-top: 0;
-            font-size: 24px;
+        
+        .report-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        .report-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e8eefc;
             margin-bottom: 10px;
         }
-        .card.monitoring h2 { color: #1db954; }
-        .card.validation h2 { color: #5e72e4; }
-        .card .desc {
-            color: #9fb0d0;
+        
+        .report-desc {
             font-size: 14px;
-            margin-bottom: 20px;
+            color: #9fb0d0;
             line-height: 1.6;
+            margin-bottom: 20px;
         }
-        .card a {
+        
+        .report-link {
             display: inline-block;
-            padding: 12px 28px;
+            padding: 10px 20px;
             background: #1db954;
             color: white;
             text-decoration: none;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 16px;
-            transition: background 0.2s;
+            font-size: 14px;
+            transition: all 0.3s ease;
         }
-        .card.validation a {
-            background: #5e72e4;
-        }
-        .card a:hover {
+        
+        .report-link:hover {
             background: #1ed760;
+            transform: scale(1.05);
         }
-        .card.validation a:hover {
-            background: #7889f4;
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
         }
-        .section-title {
-            color: #e8eefc;
-            font-size: 20px;
-            margin: 40px 0 20px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
-        }
-        .report-list {
-            list-style: none;
-            padding: 0;
-        }
-        .report-list li {
-            margin: 12px 0;
-            padding: 15px;
-            background: #121a27;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.08);
-            transition: background 0.2s;
-        }
-        .report-list li:hover {
-            background: #1a2332;
-        }
-        .report-list a {
+        
+        .status-active {
+            background: rgba(29, 185, 84, 0.2);
             color: #1db954;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
+            border: 1px solid rgba(29, 185, 84, 0.4);
         }
-        .report-list a:hover { 
-            text-decoration: underline; 
+        
+        .status-validation {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.4);
         }
-        .report-list .desc {
+        
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: #9fb0d0;
-            font-size: 13px;
-            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 32px;
+            }
+            
+            .section-title {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>📊 MLOps Monitoring Dashboard</h1>
-    <div class="subtitle">Churn Prediction - Model Quality & Performance</div>
-    
-    <!-- RAPPORTS PRINCIPAUX -->
-    <div class="grid">
-        <div class="card monitoring">
-            <h2>📊 Production Monitoring</h2>
-            <div class="desc">
-                Surveillance en temps réel de la performance du modèle en production.
-                Détection de drift et analyse des métriques.
-            </div>
-            <a href="combined_report.html">📊 Ouvrir le Rapport</a>
-        </div>
-        
-        <div class="card validation">
-            <h2>🔍 Model Validation</h2>
-            <div class="desc">
-                Tests de qualité du modèle et validation des données.
-                Suite complète Deepchecks pour garantir la fiabilité.
-            </div>
-            <a href="deepchecks_report.html">🔍 Ouvrir le Rapport</a>
-        </div>
-    </div>
+    <div class="container">
+        <header>
+            <h1>📊 MLOps Monitoring Dashboard</h1>
+            <p class="subtitle">Churn Prediction Model - Quality & Performance Monitoring</p>
+        </header>
 
-    <!-- RAPPORTS DÉTAILLÉS -->
-    <div class="section-title">📈 Rapports Détaillés</div>
-    <ul class="report-list">
-        <li>
-            <a href="monitoring_report.html">📈 Data Drift Report (Evidently)</a>
-            <div class="desc">Analyse détaillée du drift des features entre référence et production</div>
-        </li>
-        <li>
-            <a href="performance_report.html">🎯 Model Performance Report</a>
-            <div class="desc">Métriques de performance : accuracy, precision, recall, F1, ROC-AUC</div>
-        </li>
-        <li>
-            <a href="deepchecks_report.html">🔍 Deepchecks Full Validation</a>
-            <div class="desc">Suite complète de tests : intégrité des données, train-test validation, évaluation du modèle</div>
-        </li>
-    </ul>
-    
-    <div class="section-title">📄 Données Brutes (JSON)</div>
-    <ul class="report-list">
-        <li>
-            <a href="monitoring_tests.json">📄 Drift Tests Results</a>
-            <div class="desc">Résultats des tests de drift au format JSON</div>
-        </li>
-        <li>
-            <a href="performance_metrics.json">📄 Performance Metrics</a>
-            <div class="desc">Métriques de performance au format JSON</div>
-        </li>
-    </ul>
+        <!-- EVIDENTLY REPORTS -->
+        <h2 class="section-title">📈 Production Monitoring (Evidently)</h2>
+        <div class="reports-grid">
+            <div class="report-card">
+                <div class="report-icon">📊</div>
+                <div class="report-title">Data Drift Report</div>
+                <div class="report-desc">
+                    Analyse complète du drift des données entre référence et production. 
+                    Détection des changements dans la distribution des features.
+                </div>
+                <a href="monitoring_report.html" class="report-link">📊 Voir le Rapport</a>
+                <div class="status-badge status-active">Production</div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-icon">🎯</div>
+                <div class="report-title">Model Performance</div>
+                <div class="report-desc">
+                    Métriques de performance du modèle : accuracy, precision, recall, F1-score, ROC AUC.
+                    Comparaison référence vs. production.
+                </div>
+                <a href="performance_report.html" class="report-link">🎯 Voir le Rapport</a>
+                <div class="status-badge status-active">Production</div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-icon">📄</div>
+                <div class="report-title">Drift Tests (JSON)</div>
+                <div class="report-desc">
+                    Résultats détaillés des tests de drift au format JSON.
+                    Pour analyse programmatique et intégration API.
+                </div>
+                <a href="monitoring_tests.json" class="report-link">📄 Télécharger</a>
+                <div class="status-badge status-active">Production</div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-icon">📊</div>
+                <div class="report-title">Performance Metrics (JSON)</div>
+                <div class="report-desc">
+                    Métriques de performance exportées au format JSON.
+                    Pour dashboards personnalisés et alerting.
+                </div>
+                <a href="performance_metrics.json" class="report-link">📊 Télécharger</a>
+                <div class="status-badge status-active">Production</div>
+            </div>
+        </div>
+
+        <!-- DEEPCHECKS REPORTS -->
+        <h2 class="section-title">🔍 Quality Validation (Deepchecks)</h2>
+        <div class="reports-grid">
+            <div class="report-card">
+                <div class="report-icon">📋</div>
+                <div class="report-title">Validation Summary</div>
+                <div class="report-desc">
+                    Vue d'ensemble de tous les tests de validation Deepchecks.
+                    Résumé des tests réussis et échoués.
+                </div>
+                <a href="deepchecks_summary.html" class="report-link">📋 Voir le Résumé</a>
+                <div class="status-badge status-validation">Validation</div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-icon">🔍</div>
+                <div class="report-title">Data Integrity</div>
+                <div class="report-desc">
+                    Tests d'intégrité des données : missing values, duplicates,
+                    types de données, outliers, et cohérence.
+                </div>
+                <a href="data_integrity_report.html" class="report-link">🔍 Voir le Rapport</a>
+                <div class="status-badge status-validation">Validation</div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-icon">📊</div>
+                <div class="report-title">Train-Test Validation</div>
+                <div class="report-desc">
+                    Validation de la cohérence entre données d'entraînement et de test.
+                    Détection de data leakage et distribution shifts.
+                </div>
+                <a href="train_test_validation_report.html" class="report-link">📊 Voir le Rapport</a>
+                <div class="status-badge status-validation">Validation</div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-icon">🎯</div>
+                <div class="report-title">Model Evaluation</div>
+                <div class="report-desc">
+                    Évaluation détaillée de la performance du modèle.
+                    Tests de robustesse, feature importance, et overfitting.
+                </div>
+                <a href="model_evaluation_report.html" class="report-link">🎯 Voir le Rapport</a>
+                <div class="status-badge status-validation">Validation</div>
+            </div>
+        </div>
+
+        <footer>
+            <p>MLOps Project - Churn Prediction | Automated Quality & Performance Monitoring</p>
+            <p style="margin-top: 10px; font-size: 12px;">
+                Powered by Evidently AI & Deepchecks | Jenkins CI/CD Pipeline
+            </p>
+        </footer>
+    </div>
 </body>
 </html>
