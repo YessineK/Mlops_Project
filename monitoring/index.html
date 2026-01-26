@@ -119,6 +119,16 @@
             transform: scale(1.05);
         }
         
+        .report-link.disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .report-link.disabled:hover {
+            transform: none;
+        }
+        
         .status-badge {
             display: inline-block;
             padding: 4px 12px;
@@ -140,6 +150,12 @@
             border: 1px solid rgba(59, 130, 246, 0.4);
         }
         
+        .status-unavailable {
+            background: rgba(255, 77, 77, 0.2);
+            color: #ff4d4d;
+            border: 1px solid rgba(255, 77, 77, 0.4);
+        }
+        
         footer {
             text-align: center;
             margin-top: 60px;
@@ -147,6 +163,24 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: #9fb0d0;
             font-size: 14px;
+        }
+        
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-box h3 {
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+        
+        .info-box p {
+            color: #9fb0d0;
+            line-height: 1.6;
         }
         
         @media (max-width: 768px) {
@@ -181,7 +215,7 @@
                     Analyse complète du drift des données entre référence et production. 
                     Détection des changements dans la distribution des features.
                 </div>
-                <a href="monitoring_report.html" class="report-link">📊 Voir le Rapport</a>
+                <a href="./monitoring_report.html" class="report-link" target="_blank">📊 Voir le Rapport</a>
                 <div class="status-badge status-active">Production</div>
             </div>
 
@@ -192,7 +226,7 @@
                     Métriques de performance du modèle : accuracy, precision, recall, F1-score, ROC AUC.
                     Comparaison référence vs. production.
                 </div>
-                <a href="performance_report.html" class="report-link">🎯 Voir le Rapport</a>
+                <a href="./performance_report.html" class="report-link" target="_blank">🎯 Voir le Rapport</a>
                 <div class="status-badge status-active">Production</div>
             </div>
 
@@ -203,7 +237,7 @@
                     Résultats détaillés des tests de drift au format JSON.
                     Pour analyse programmatique et intégration API.
                 </div>
-                <a href="monitoring_tests.json" class="report-link">📄 Télécharger</a>
+                <a href="./monitoring_tests.json" class="report-link" target="_blank">📄 Télécharger</a>
                 <div class="status-badge status-active">Production</div>
             </div>
 
@@ -214,13 +248,22 @@
                     Métriques de performance exportées au format JSON.
                     Pour dashboards personnalisés et alerting.
                 </div>
-                <a href="performance_metrics.json" class="report-link">📊 Télécharger</a>
+                <a href="./performance_metrics.json" class="report-link" target="_blank">📊 Télécharger</a>
                 <div class="status-badge status-active">Production</div>
             </div>
         </div>
 
         <!-- DEEPCHECKS REPORTS -->
         <h2 class="section-title">🔍 Quality Validation (Deepchecks)</h2>
+        
+        <div class="info-box">
+            <h3>ℹ️ À propos de Deepchecks</h3>
+            <p>
+                Les rapports Deepchecks seront disponibles après la prochaine exécution du pipeline Jenkins.
+                Si les rapports ne s'affichent pas, cela signifie que Deepchecks n'a pas encore été exécuté ou qu'une erreur s'est produite.
+            </p>
+        </div>
+        
         <div class="reports-grid">
             <div class="report-card">
                 <div class="report-icon">📋</div>
@@ -229,7 +272,7 @@
                     Vue d'ensemble de tous les tests de validation Deepchecks.
                     Résumé des tests réussis et échoués.
                 </div>
-                <a href="deepchecks_summary.html" class="report-link">📋 Voir le Résumé</a>
+                <a href="./deepchecks_summary.html" class="report-link" target="_blank" onclick="return checkFile(this)">📋 Voir le Résumé</a>
                 <div class="status-badge status-validation">Validation</div>
             </div>
 
@@ -240,7 +283,7 @@
                     Tests d'intégrité des données : missing values, duplicates,
                     types de données, outliers, et cohérence.
                 </div>
-                <a href="data_integrity_report.html" class="report-link">🔍 Voir le Rapport</a>
+                <a href="./data_integrity_report.html" class="report-link" target="_blank" onclick="return checkFile(this)">🔍 Voir le Rapport</a>
                 <div class="status-badge status-validation">Validation</div>
             </div>
 
@@ -251,7 +294,7 @@
                     Validation de la cohérence entre données d'entraînement et de test.
                     Détection de data leakage et distribution shifts.
                 </div>
-                <a href="train_test_validation_report.html" class="report-link">📊 Voir le Rapport</a>
+                <a href="./train_test_validation_report.html" class="report-link" target="_blank" onclick="return checkFile(this)">📊 Voir le Rapport</a>
                 <div class="status-badge status-validation">Validation</div>
             </div>
 
@@ -262,7 +305,7 @@
                     Évaluation détaillée de la performance du modèle.
                     Tests de robustesse, feature importance, et overfitting.
                 </div>
-                <a href="model_evaluation_report.html" class="report-link">🎯 Voir le Rapport</a>
+                <a href="./model_evaluation_report.html" class="report-link" target="_blank" onclick="return checkFile(this)">🎯 Voir le Rapport</a>
                 <div class="status-badge status-validation">Validation</div>
             </div>
         </div>
@@ -274,5 +317,24 @@
             </p>
         </footer>
     </div>
+    
+    <script>
+        function checkFile(link) {
+            // Cette fonction vérifie si le fichier existe
+            // Si le fichier n'existe pas, affiche un message
+            var xhr = new XMLHttpRequest();
+            xhr.open('HEAD', link.href, false);
+            try {
+                xhr.send();
+                if (xhr.status === 404) {
+                    alert('⚠️ Ce rapport n\'est pas encore disponible.\n\nLe rapport Deepchecks sera généré lors de la prochaine exécution du pipeline Jenkins.');
+                    return false;
+                }
+            } catch(e) {
+                console.log('Could not check file:', e);
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>
