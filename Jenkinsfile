@@ -103,160 +103,45 @@ pipeline {
             }
         }
 
-        stage('🧪 Deepchecks Validation') {
+        stage('📊 Data Drift Monitoring') {
             steps {
-                echo '🧪 Validation qualité du modèle avec Deepchecks...'
-                script {
-                    def deepchecksStatus = sh(
-                        script: '''
-                            set +e  # Ne pas arrêter sur erreur
-                            
-                            echo "📦 Installation de Deepchecks et dépendances..."
-                            pip3 install --break-system-packages setuptools deepchecks 2>&1
-                            
-                            echo ""
-                            echo "🔍 Exécution des tests de validation..."
-                            cd testing
-                            
-                            # Exécuter et capturer le code de sortie
-                            python3 run_deepchecks.py
-                            EXIT_CODE=$?
-                            
-                            echo ""
-                            echo "Exit code: $EXIT_CODE"
-                            
-                            # Vérifier que les fichiers ont été créés
-                            echo "📋 Fichiers générés:"
-                            ls -lh *.html 2>/dev/null || echo "Aucun fichier HTML trouvé"
-                            
-                            # Toujours retourner 0 pour ne pas bloquer
-                            exit 0
-                        ''',
-                        returnStatus: true
-                    )
-                    
-                    echo "✅ Deepchecks terminé (status: ${deepchecksStatus})"
-                }
-            }
-        }
-
-        stage('📄 Copy & Archive Reports') {
-            steps {
-                echo '📄 Copie et archivage des rapports...'
-                
-                script {
-                    // Copier les rapports Deepchecks vers monitoring/
-                    sh '''
-                        echo "📋 Copie des rapports Deepchecks..."
-                        cp testing/*.html monitoring/ 2>/dev/null || echo "⚠️ Pas de rapports HTML Deepchecks"
-                        
-                        echo "✅ Copie terminée"
-                    '''
-                    
-                    try {
-                        // Archive Evidently
-                        archiveArtifacts artifacts: 'monitoring/combined_report.html',
-                                        allowEmptyArchive: true
-                        archiveArtifacts artifacts: 'monitoring/monitoring_report.html',
-                                        allowEmptyArchive: true
-                        archiveArtifacts artifacts: 'monitoring/monitoring_tests.json',
-                                        allowEmptyArchive: true
-                        archiveArtifacts artifacts: 'monitoring/performance_report.html',
-                                        allowEmptyArchive: true
-                        archiveArtifacts artifacts: 'monitoring/performance_metrics.json',
-                                        allowEmptyArchive: true
-                        
-                        // Archive Deepchecks
-                        archiveArtifacts artifacts: 'monitoring/deepchecks_summary.html',
-                                        allowEmptyArchive: true
-                        archiveArtifacts artifacts: 'monitoring/data_integrity_report.html',
-                                        allowEmptyArchive: true
-                        archiveArtifacts artifacts: 'monitoring/train_test_validation_report.html',
-                                        allowEmptyArchive: true
-                        archiveArtifacts artifacts: 'monitoring/model_evaluation_report.html',
-                                        allowEmptyArchive: true
-                        
-                        echo '✅ Tous les rapports archivés'
-                    } catch (Exception e) {
-                        echo "⚠️ Erreur d'archivage: ${e.message}"
-                    }
-                }
-            }
-        }
-
-        stage('📄 Archive Deepchecks Report') {
-            steps {
-                echo '📄 Archivage du rapport Deepchecks...'
-                
-                script {
-                    try {
-                        archiveArtifacts artifacts: 'testing/deepchecks_report.html',
-                                        allowEmptyArchive: true,
-                                        fingerprint: true
-                        
-                        echo '✅ Rapport Deepchecks archivé'
-                    } catch (Exception e) {
-                        echo "⚠️ Le rapport n'a pas pu être archivé"
-                    }
-                }
-            }
-        }
-        stage('🔍 Validate Model Files') {
-            steps {
-                echo '🔍 Validation des fichiers du modèle...'
+                echo '📊 Vérification du data drift avec Evidently...'
                 sh '''
-                    MODEL_FILE="backend/src/processors/models/best_model_final.pkl"
-                    PREPROCESSOR_FILE="backend/src/processors/preprocessor.pkl"
-                    
-                    echo "🔎 Vérification du modèle..."
-                    if [ -f "$MODEL_FILE" ]; then
-                        echo "✅ Modèle trouvé: $MODEL_FILE"
-                        ls -lh "$MODEL_FILE"
-                    else
-                        echo "❌ ERREUR CRITIQUE: Modèle non trouvé!"
-                        exit 1
-                    fi
+                    echo "📦 Installation d'Evidently..."
+                    pip3 install --break-system-packages evidently || true
                     
                     echo ""
-                    echo "🔎 Vérification du preprocessor..."
-                    if [ -f "$PREPROCESSOR_FILE" ]; then
-                        echo "✅ Preprocessor trouvé: $PREPROCESSOR_FILE"
-                        ls -lh "$PREPROCESSOR_FILE"
-                    else
-                        echo "⚠️  WARNING: Preprocessor non trouvé"
-                    fi
+                    echo "📂 Préparation des données..."
+                    cd monitoring
+                    python3 prepare_data.py
+                    
+                    echo ""
+                    echo "📊 Génération du rapport de monitoring..."
+                    python3 run_monitoring.py
+                    
+                    echo ""
+                    echo "✅ Monitoring terminé"
                 '''
             }
         }
 
         stage('📄 Archive Monitoring Reports') {
             steps {
-                echo '📄 Archivage des rapports HTML et JSON...'
+                echo '📄 Archivage des rapports...'
                 
-                // Rapport combiné (PRINCIPAL)
-                archiveArtifacts artifacts: 'monitoring/combined_report.html',
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                // Rapport Evidently (drift)
                 archiveArtifacts artifacts: 'monitoring/monitoring_report.html', 
-                                allowEmptyArchive: true,
-                                fingerprint: true
+                                allowEmptyArchive: true
                 
                 archiveArtifacts artifacts: 'monitoring/monitoring_tests.json',
-                                allowEmptyArchive: true,
-                                fingerprint: true
+                                allowEmptyArchive: true
                 
-                // Rapport Performance
                 archiveArtifacts artifacts: 'monitoring/performance_report.html',
-                                allowEmptyArchive: true,
-                                fingerprint: true
+                                allowEmptyArchive: true
                 
                 archiveArtifacts artifacts: 'monitoring/performance_metrics.json',
-                                allowEmptyArchive: true,
-                                fingerprint: true
+                                allowEmptyArchive: true
                 
-                echo '✅ Tous les rapports archivés'
+                echo '✅ Rapports archivés'
             }
         }
 
