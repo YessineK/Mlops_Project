@@ -1,74 +1,140 @@
-# Monitoring Module - Evidently AI
+# 📊 Monitoring Module – Evidently AI (CI/CD Integrated)
 
-This module provides data drift monitoring for the fraud detection MLOps pipeline using Evidently AI.
+This module provides **automated data drift monitoring** for the MLOps pipeline using **Evidently AI**, fully integrated into the **Jenkins CI/CD workflow** and published via a **dedicated web server (Nginx)**.
 
-## Structure
+---
+
+## 🎯 Purpose
+
+The goal of this module is to continuously monitor **data distribution changes** between reference data (training) and incoming production data, in order to:
+
+* Detect data drift early
+* Maintain model reliability over time
+* Support informed retraining decisions
+
+---
+
+## 📁 Module Structure
 
 ```
 monitoring/
-├── data/                      # Generated data splits
-│   ├── reference_data.csv    # Baseline/training data (80%)
-│   └── current_data.csv      # Production/inference data (20%)
-├── prepare_data.py           # Data preparation script
-├── generate_report.py        # Report generation script
-├── run_monitoring.sh         # Automated runner script
-├── requirements.txt          # Dependencies
-├── monitoring_report.html    # Generated HTML report
-└── monitoring_tests.json     # Generated test results (when complete)
+├── data/
+│   ├── churn2.csv                    # Reference dataset
+│   ├── prod_batch_01_no_drift.csv    # Production batch (no drift)
+│   ├── prod_batch_02_light_drift.csv # Production batch (light drift)
+│   └── prod_batch_03_strong_drift.csv# Production batch (strong drift)
+├── prepare_data.py                   # Data preprocessing & splitting
+├── generate_report.py                # Evidently report generation
+├── requirements.txt                  # Monitoring dependencies
+├── index.html                        # Web entry point for reports
+├── monitoring_report.html            # Generated Evidently HTML report
+└── monitoring_tests.json             # Drift test results (JSON)
 ```
 
-## Usage
+---
 
-### Quick Start
+## 🔄 CI/CD Integration (Jenkins)
 
-Run the complete monitoring pipeline:
+The monitoring module is **executed automatically** as part of the Jenkins pipeline.
 
-```bash
-cd /Users/bassembenhamed/Desktop/Projects/MLOps
-./monitoring/run_monitoring.sh
+### Pipeline behavior
+
+At each Jenkins build:
+
+1. Reference and production datasets are compared
+2. Evidently runs statistical drift tests
+3. An interactive HTML report is generated
+4. Results are archived as build artifacts
+5. Reports are deployed via an Nginx container
+
+📌 **No manual execution is required**.
+
+---
+
+## 🌐 Report Visualization
+
+The monitoring reports are published through a **dedicated Nginx web server**, independent from Jenkins UI.
+
+🔗 Access URL:
+
+```
+http://localhost:9000
 ```
 
-### Step by Step
+Available content:
 
-1. **Prepare Data**:
+* 📈 **Interactive Evidently HTML report**
+* 📋 **JSON file containing test results**
+
+✅ Fully interactive
+✅ No Jenkins file rendering issues
+✅ Automatically updated at every build
+
+---
+
+## 📊 Generated Outputs
+
+| File                     | Description                                        |
+| ------------------------ | -------------------------------------------------- |
+| `monitoring_report.html` | Interactive dashboard with drift metrics and plots |
+| `monitoring_tests.json`  | Structured results of statistical drift tests      |
+
+---
+
+## 🧠 Drift Interpretation
+
+The Evidently report provides:
+
+* Number of analyzed features
+* Features affected by data drift
+* Statistical test results (p-values, thresholds)
+* Global drift summary
+
+**Guidelines**:
+
+* Minor or no drift → model remains valid
+* Significant drift across multiple features → retraining recommended
+
+---
+
+## 🛠️ Local Execution (Optional)
+
+Although monitoring is automated via Jenkins, the module can still be executed locally for testing purposes:
+
 ```bash
+pip install -r monitoring/requirements.txt
 python monitoring/prepare_data.py
-```
-This splits `data/fraud.csv` into reference (80%) and current (20%) datasets.
-
-2. **Generate Reports**:
-```bash
 python monitoring/generate_report.py
 ```
-This creates:
-- `monitoring_report.html` - Interactive HTML dashboard
-- `monitoring_tests.json` - Automated test results
 
-3. **View Results**:
+Then open:
+
 ```bash
 open monitoring/monitoring_report.html
 ```
 
-## Features
+---
 
-- **Data Drift Detection**: Monitors feature distributions between reference and current data
-- **Data Summary**: Provides statistical summaries of datasets
-- **Automated Tests**: Runs drift tests and flags issues
-- **Visual Reports**: Interactive HTML dashboards
+## 📦 Dependencies
 
-## Dependencies
-
-- evidently
-- pandas
-- scikit-learn
+* evidently
+* pandas
+* scikit-learn
 
 Install with:
+
 ```bash
 pip install -r monitoring/requirements.txt
 ```
 
-## Notes
+---
 
-- The monitoring uses Evidently AI v0.7.17 with legacy API for TestSuite
-- Large datasets may take several minutes to process
-- Reports are regenerated each time the script runs
+## ✅ Key Advantages
+
+* 🔁 Continuous monitoring
+* 📊 Clear and interpretable reports
+* ⚙️ Fully automated via CI/CD
+* 🌐 Independent visualization layer
+* 🧪 Reproducible and production-ready
+
+ 
