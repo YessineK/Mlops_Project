@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Monitoring Reports</title>
+    <title>Monitoring Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -10,8 +10,40 @@
             margin: 50px auto;
             background: #0b0f17;
             color: #e8eefc;
+            padding: 20px;
         }
-        h1 { color: #1db954; }
+        h1 { 
+            color: #1db954; 
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #9fb0d0;
+            margin-bottom: 30px;
+        }
+        .main-report {
+            background: #121a27;
+            border: 2px solid #1db954;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .main-report h2 {
+            margin-top: 0;
+            color: #1db954;
+        }
+        .main-report a {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #1db954;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .main-report a:hover {
+            background: #1ed760;
+        }
         .report-list {
             list-style: none;
             padding: 0;
@@ -26,9 +58,11 @@
         a {
             color: #1db954;
             text-decoration: none;
-            font-size: 18px;
+            font-size: 16px;
         }
-        a:hover { text-decoration: underline; }
+        a:hover { 
+            text-decoration: underline; 
+        }
         .desc {
             color: #9fb0d0;
             font-size: 14px;
@@ -37,7 +71,16 @@
     </style>
 </head>
 <body>
-    <h1>📊 Monitoring Reports Dashboard</h1>
+    <h1>📊 Monitoring Dashboard</h1>
+    <div class="subtitle">MLOps Project - Churn Prediction</div>
+    
+    <div class="main-report">
+        <h2>🎯 Rapport Principal</h2>
+        <p class="desc">Vue combinée : Data Drift + Model Performance</p>
+        <a href="combined_report.html">📊 Ouvrir le Rapport Complet</a>
+    </div>
+
+    <h2>📄 Rapports Individuels</h2>
     <ul class="report-list">
         <li>
             <a href="monitoring_report.html">📈 Data Drift Report (Evidently)</a>

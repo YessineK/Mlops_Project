@@ -148,6 +148,10 @@ pipeline {
                     python3 run_monitoring.py
                     
                     echo ""
+                    echo "🔗 Combinaison des rapports..."
+                    python3 combine_reports.py
+                    
+                    echo ""
                     echo "✅ Monitoring terminé"
                 '''
             }
@@ -156,6 +160,11 @@ pipeline {
         stage('📄 Archive Monitoring Reports') {
             steps {
                 echo '📄 Archivage des rapports HTML et JSON...'
+                
+                // Rapport combiné (PRINCIPAL)
+                archiveArtifacts artifacts: 'monitoring/combined_report.html',
+                                allowEmptyArchive: true,
+                                fingerprint: true
                 
                 // Rapport Evidently (drift)
                 archiveArtifacts artifacts: 'monitoring/monitoring_report.html', 
@@ -166,7 +175,7 @@ pipeline {
                                 allowEmptyArchive: true,
                                 fingerprint: true
                 
-                // Nouveau : Rapport Performance
+                // Rapport Performance
                 archiveArtifacts artifacts: 'monitoring/performance_report.html',
                                 allowEmptyArchive: true,
                                 fingerprint: true
