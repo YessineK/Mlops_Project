@@ -153,19 +153,32 @@ pipeline {
             }
         }
 
-        stage('📄 Archive Monitoring Report') {
+        stage('📄 Archive Monitoring Reports') {
             steps {
-                echo '📄 Archivage du rapport HTML...'
+                echo '📄 Archivage des rapports HTML et JSON...'
+                
+                // Rapport Evidently (drift)
                 archiveArtifacts artifacts: 'monitoring/monitoring_report.html', 
                                 allowEmptyArchive: true,
                                 fingerprint: true
                 
-                echo '📄 Archivage des résultats JSON...'
                 archiveArtifacts artifacts: 'monitoring/monitoring_tests.json',
                                 allowEmptyArchive: true,
                                 fingerprint: true
+                
+                // Nouveau : Rapport Performance
+                archiveArtifacts artifacts: 'monitoring/performance_report.html',
+                                allowEmptyArchive: true,
+                                fingerprint: true
+                
+                archiveArtifacts artifacts: 'monitoring/performance_metrics.json',
+                                allowEmptyArchive: true,
+                                fingerprint: true
+                
+                echo '✅ Tous les rapports archivés'
             }
         }
+
         stage('📊 Publish Monitoring Report') {
             steps {
                 echo '🌐 Publication du rapport Evidently...'
@@ -173,7 +186,14 @@ pipeline {
                     echo "🐳 Build de l'image monitoring-reports..."
                     docker build -t monitoring-reports:latest ./monitoring
                     
-                    echo "✅ Image monitoring construite"
+                    echo "🗑️ Nettoyage du conteneur existant..."
+                    docker stop monitoring-reports || true
+                    docker rm monitoring-reports || true
+                    
+                    echo "🚀 Lancement du nouveau conteneur..."
+                    docker run -d --name monitoring-reports -p 9000:80 monitoring-reports:latest
+                    
+                    echo "✅ Rapport accessible sur http://localhost:9000"
                 '''
             }
         }
