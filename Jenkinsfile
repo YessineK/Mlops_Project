@@ -170,19 +170,10 @@ pipeline {
             steps {
                 echo '🌐 Publication du rapport Evidently...'
                 sh '''
-                    # Stop ancien conteneur
-                    docker rm -f monitoring-reports || true
-
-                    # Build image Nginx avec rapports
-                    docker build -t monitoring-reports ./monitoring
-
-                    # Run serveur
-                    docker run -d \
-                    --name monitoring-reports \
-                    -p 9000:80 \
-                    monitoring-reports
-
-                    echo "✅ Rapport accessible sur http://localhost:9000"
+                    echo "🐳 Build de l'image monitoring-reports..."
+                    docker build -t monitoring-reports:latest ./monitoring
+                    
+                    echo "✅ Image monitoring construite"
                 '''
             }
         }
