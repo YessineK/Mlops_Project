@@ -1,5 +1,8 @@
 import pandas as pd
 import os
+import subprocess
+import sys
+
 
 def prepare_data():
     # -----------------------------
@@ -13,6 +16,8 @@ def prepare_data():
 
     # Current = batch "prod" (tu peux changer celui-ci)
     current_path = os.path.join(base_dir, "data", "prod_batch_BIG_DRIFT.csv")
+
+    print("CURRENT FILE USED:", current_path)
 
     # Output (où seront écrits reference_data.csv et current_data.csv)
     output_dir = os.path.join(base_dir, "data")
@@ -85,3 +90,16 @@ def prepare_data():
 
 if __name__ == "__main__":
     prepare_data()
+    print("✅ prepare_data finished.")
+    print("🚀 Launching score_data.py automatically...")
+
+    try:
+        subprocess.run(
+            [sys.executable, "score_data.py"],
+            check=True
+        )
+        print("✅ score_data.py completed successfully.")
+    except subprocess.CalledProcessError as e:
+        print("❌ Error while running score_data.py")
+        print(e)
+

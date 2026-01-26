@@ -1,179 +1,60 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Reports - Evidently AI</title>
+    <meta charset="utf-8">
+    <title>Monitoring Reports</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            background: #0b0f17;
+            color: #e8eefc;
         }
-        
-        .container {
-            max-width: 900px;
-            width: 100%;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
+        h1 { color: #1db954; }
+        .report-list {
+            list-style: none;
+            padding: 0;
         }
-        
-        h1 {
-            color: #667eea;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-align: center;
+        .report-list li {
+            margin: 15px 0;
+            padding: 15px;
+            background: #121a27;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 40px;
-            font-size: 1.1em;
-        }
-        
-        .report-section {
-            margin: 30px 0;
-        }
-        
-        .report-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-        }
-        
-        .report-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-        
-        .report-card h2 {
-            color: #333;
-            font-size: 1.5em;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .icon {
-            font-size: 1.8em;
-            margin-right: 15px;
-        }
-        
-        .report-card p {
-            color: #555;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #667eea;
-            color: white;
+        a {
+            color: #1db954;
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: background 0.3s;
+            font-size: 18px;
         }
-        
-        .btn:hover {
-            background: #764ba2;
-        }
-        
-        .info-box {
-            background: #e8f4f8;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .info-box h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .info-box ul {
-            margin-left: 20px;
-            color: #555;
-        }
-        
-        .info-box li {
-            margin: 8px 0;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            color: white;
-            font-size: 0.9em;
+        a:hover { text-decoration: underline; }
+        .desc {
+            color: #9fb0d0;
+            font-size: 14px;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📊 Monitoring Reports</h1>
-        <p class="subtitle">Data Drift Detection avec Evidently AI</p>
-        
-        <div class="report-section">
-            <div class="report-card">
-                <h2><span class="icon">📈</span>Rapport de Data Drift</h2>
-                <p>
-                    Rapport interactif complet montrant les changements de distribution des données
-                    entre les données de référence et les données de production.
-                </p>
-                <a href="monitoring_report.html" class="btn">Voir le Rapport HTML</a>
-            </div>
-            
-            <div class="report-card">
-                <h2><span class="icon">🧪</span>Résultats des Tests</h2>
-                <p>
-                    Fichier JSON contenant les résultats détaillés des tests statistiques
-                    de détection de drift.
-                </p>
-                <a href="monitoring_tests.json" class="btn">Télécharger JSON</a>
-            </div>
-        </div>
-        
-        <div class="info-box">
-            <h3>ℹ️ À propos du Monitoring</h3>
-            <ul>
-                <li><strong>Fréquence :</strong> Généré automatiquement à chaque build Jenkins</li>
-                <li><strong>Données :</strong> Comparaison reference vs production</li>
-                <li><strong>Métriques :</strong> Tests statistiques sur toutes les features</li>
-                <li><strong>Alertes :</strong> Drift détecté si tests échouent</li>
-            </ul>
-        </div>
-        
-        <div class="info-box">
-            <h3>🔍 Interprétation</h3>
-            <ul>
-                <li>✅ <strong>Tests réussis :</strong> Modèle reste valide</li>
-                <li>⚠️ <strong>Drift mineur :</strong> Surveillance recommandée</li>
-                <li>🚨 <strong>Drift significatif :</strong> Réentraînement nécessaire</li>
-            </ul>
-        </div>
-    </div>
-    
-    <footer>
-        <p>🚀 MLOps Churn Prediction Pipeline</p>
-        <p>Build automatisé avec Jenkins | Monitoring avec Evidently AI</p>
-    </footer>
+    <h1>📊 Monitoring Reports Dashboard</h1>
+    <ul class="report-list">
+        <li>
+            <a href="monitoring_report.html">📈 Data Drift Report (Evidently)</a>
+            <div class="desc">Analyse du drift des données entre référence et production</div>
+        </li>
+        <li>
+            <a href="performance_report.html">🎯 Model Performance Report</a>
+            <div class="desc">Métriques de performance du modèle (accuracy, precision, recall, F1, AUC)</div>
+        </li>
+        <li>
+            <a href="monitoring_tests.json">📄 Drift Tests (JSON)</a>
+            <div class="desc">Résultats des tests de drift au format JSON</div>
+        </li>
+        <li>
+            <a href="performance_metrics.json">📄 Performance Metrics (JSON)</a>
+            <div class="desc">Métriques de performance au format JSON</div>
+        </li>
+    </ul>
 </body>
 </html>
