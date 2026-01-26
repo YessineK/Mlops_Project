@@ -108,8 +108,8 @@ pipeline {
                 sh '''
                     set +e  # Ne pas arrêter sur erreur
                     
-                    echo "📦 Installation de Deepchecks..."
-                    pip3 install --break-system-packages setuptools deepchecks
+                    echo "📦 Installation de Deepchecks avec scikit-learn compatible..."
+                    pip3 install --break-system-packages "scikit-learn==1.5.2" setuptools deepchecks
                     
                     echo ""
                     echo "🔍 Exécution de Deepchecks..."
