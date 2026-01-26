@@ -1,4 +1,12 @@
 services:
+  monitoring-reports:
+      image: monitoring-reports:latest
+      container_name: monitoring-reports
+      ports:
+        - "9000:80"
+      networks:
+        - churn-network
+      restart: unless-stopped
   backend:
     build:
       context: ./backend/src
