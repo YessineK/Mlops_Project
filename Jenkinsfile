@@ -106,8 +106,8 @@ pipeline {
             steps {
                 echo '🧪 Validation qualité du modèle avec Deepchecks...'
                 sh '''
-                    echo "📦 Installation de Deepchecks..."
-                    pip3 install --break-system-packages deepchecks || true
+                    echo "📦 Installation de Deepchecks et dépendances..."
+                    pip3 install --break-system-packages setuptools deepchecks || true
                     
                     echo ""
                     echo "🔍 Exécution des tests de validation..."
