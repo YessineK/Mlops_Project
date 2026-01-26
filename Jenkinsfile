@@ -102,7 +102,47 @@ pipeline {
                 '''
             }
         }
-        
+        stage('🧪 Deepchecks Validation') {
+            steps {
+                echo '🧪 Validation qualité du modèle avec Deepchecks...'
+                sh '''
+                    echo "📦 Installation de Deepchecks..."
+                    pip3 install --break-system-packages deepchecks || true
+                    
+                    echo ""
+                    echo "🔍 Exécution des tests de validation..."
+                    cd testing
+                    python3 run_deepchecks.py
+                    
+                    echo ""
+                    echo "✅ Validation Deepchecks terminée"
+                '''
+            }
+        }
+
+        stage('📄 Archive Deepchecks Reports') {
+            steps {
+                echo '📄 Archivage des rapports Deepchecks...'
+                
+                archiveArtifacts artifacts: 'testing/deepchecks_summary.html',
+                                allowEmptyArchive: true,
+                                fingerprint: true
+                
+                archiveArtifacts artifacts: 'testing/data_integrity_report.html',
+                                allowEmptyArchive: true,
+                                fingerprint: true
+                
+                archiveArtifacts artifacts: 'testing/train_test_validation_report.html',
+                                allowEmptyArchive: true,
+                                fingerprint: true
+                
+                archiveArtifacts artifacts: 'testing/model_evaluation_report.html',
+                                allowEmptyArchive: true,
+                                fingerprint: true
+                
+                echo '✅ Rapports Deepchecks archivés'
+            }
+        }
         stage('🔍 Validate Model Files') {
             steps {
                 echo '🔍 Validation des fichiers du modèle...'
