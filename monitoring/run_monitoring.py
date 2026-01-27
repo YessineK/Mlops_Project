@@ -259,7 +259,7 @@ def run_drift(reference_data: pd.DataFrame, current_data: pd.DataFrame, base_dir
     - Evidently TestSuite JSON (legacy)
     """
 
-    from evidently import Report
+    from evidently.report import Report
     from evidently.presets import DataDriftPreset, DataSummaryPreset
 
     try:
