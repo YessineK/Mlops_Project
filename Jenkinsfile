@@ -302,7 +302,7 @@ pipeline {
                     
                     echo ""
                     echo "🛑 Arrêt des conteneurs existants..."
-                    docker-compose down || true
+                    docker compose down || true
                     
                     echo ""
                     echo "🧹 Nettoyage des conteneurs arrêtés..."
@@ -310,7 +310,7 @@ pipeline {
                     
                     echo ""
                     echo "🚀 Démarrage des nouveaux conteneurs..."
-                    docker-compose up -d
+                    docker compose up -d
                     
                     echo ""
                     echo "⏳ Attente du démarrage des services (10s)..."
@@ -318,7 +318,7 @@ pipeline {
                     
                     echo ""
                     echo "🔍 Vérification des conteneurs actifs:"
-                    docker-compose ps
+                    docker compose ps
                     
                     echo ""
                     echo "✅ Déploiement terminé!"
@@ -335,11 +335,11 @@ pipeline {
                     
                     echo ""
                     echo "🔍 Logs Backend (dernières 20 lignes):"
-                    docker-compose logs --tail=20 backend || true
+                    docker compose logs --tail=20 backend || true
                     
                     echo ""
                     echo "🔍 Logs Frontend (dernières 20 lignes):"
-                    docker-compose logs --tail=20 frontend || true
+                    docker compose logs --tail=20 frontend || true
                 '''
             }
         }
