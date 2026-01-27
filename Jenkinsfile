@@ -90,24 +90,28 @@ pipeline {
                 sh '''
                     set +e
                     
-                    echo "📦 Installation de Deepchecks 0.17.3 (compatible)..."
-                    pip3 install --break-system-packages "deepchecks==0.17.3"
+                    echo "🔧 Création environnement virtuel..."
+                    python3 -m venv /tmp/deepchecks_env
+                    source /tmp/deepchecks_env/bin/activate
+                    
+                    echo "📦 Installation dans venv..."
+                    pip install "scikit-learn==1.5.2"
+                    pip install "deepchecks==0.17.3"
+                    pip install pandas numpy lightgbm imbalanced-learn joblib
                     
                     echo ""
-                    echo "🔍 Vérification des versions:"
-                    python3 -c "import sklearn; print('Scikit-learn:', sklearn.__version__)"
-                    python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)"
+                    echo "🔍 Versions installées:"
+                    python -c "import sklearn; print('Scikit-learn:', sklearn.__version__)"
                     
                     echo ""
                     echo "🔍 Exécution de Deepchecks..."
                     cd testing
-                    python3 run_deepchecks.py
-                    EXIT_CODE=$?
+                    python run_deepchecks.py
                     
                     echo ""
-                    echo "📋 Fichiers générés:"
-                    ls -lh *.html 2>/dev/null || echo "❌ Aucun fichier HTML"
+                    ls -lh *.html 2>/dev/null
                     
+                    deactivate
                     exit 0
                 '''
             }
