@@ -36,11 +36,11 @@ pipeline {
             steps {
                 echo '🔧 Installation des dépendances système...'
                 sh '''
-                    apt-get update
-                    apt-get install -y libgomp1 python3-pip
+                    sudo apt-get update
+                    sudo apt-get install -y libgomp1 python3-pip
                 '''
             }
-        }   
+        } 
         stage('🔍 Verify Structure') {
             steps {
                 echo '🔍 Vérification de la structure du projet...'
