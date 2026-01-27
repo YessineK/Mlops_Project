@@ -110,8 +110,20 @@ pipeline {
                 sh '''
                     set +e
                     
-                    echo "📦 Installation de Deepchecks..."
-                    pip3 install --break-system-packages "deepchecks==0.17.3"
+                    echo "🗑️ Désinstallation complète de scikit-learn..."
+                    pip3 uninstall -y scikit-learn
+                    
+                    echo ""
+                    echo "📦 Installation de scikit-learn 1.3.2 (compatible Deepchecks 0.17.3)..."
+                    pip3 install --break-system-packages "scikit-learn==1.3.2"
+                    
+                    echo ""
+                    echo "📦 Installation de Deepchecks 0.17.3..."
+                    pip3 install --break-system-packages "deepchecks==0.17.3" --no-deps
+                    
+                    echo ""
+                    echo "📦 Installation manuelle des dépendances Deepchecks..."
+                    pip3 install --break-system-packages pandas numpy scipy plotly matplotlib requests jsonpickle tqdm statsmodels
                     
                     echo ""
                     echo "🔍 Vérification des versions:"
@@ -134,6 +146,8 @@ pipeline {
                     echo "📋 Nouveaux fichiers générés:"
                     ls -lh *.html 2>/dev/null || echo "❌ Aucun fichier HTML généré"
                     
+                    echo ""
+                    echo "✅ Stage terminé"
                     exit 0
                 '''
             }
