@@ -108,7 +108,47 @@ pipeline {
                 '''
             }
         }
-        
+        stage('📊 Data Drift Monitoring') {
+            steps {
+                echo "📊 Vérification du data drift avec Evidently..."
+                sh '''
+                    echo "📦 Installation d'Evidently..."
+                    pip3 install --break-system-packages 'evidently<0.4.0'
+                    
+                    # RÉINSTALLER scikit-learn 1.5.2 après Evidently
+                    echo "🔧 Réinstallation de scikit-learn 1.5.2..."
+                    pip3 install --break-system-packages scikit-learn==1.5.2 --force-reinstall
+                    
+                    echo ""
+                    echo "📂 Préparation des données..."
+                    cd monitoring
+                    python3 prepare_data.py
+                    
+                    echo ""
+                    echo "📊 Génération du rapport de drift..."
+                    python3 data_drift_monitoring.py
+                '''
+            }
+        }
+        stage('📊 Publish Monitoring Report') {
+            steps {
+                echo '🌐 Publication du rapport de monitoring...'
+                sh '''
+                    echo "🐳 Build de l'image monitoring-reports..."
+                    docker build -t monitoring-reports:latest ./monitoring
+                    
+                    echo "🗑️ Nettoyage du conteneur existant..."
+                    docker stop monitoring-reports || true
+                    docker rm monitoring-reports || true
+                    
+                    echo "🚀 Lancement du nouveau conteneur..."
+                    docker run -d --name monitoring-reports -p 9000:80 monitoring-reports:latest
+                    
+                    echo "✅ Rapport de monitoring accessible sur http://localhost:9000"
+                '''
+            }
+        }
+                
 
         stage('🐳 Build Docker Images') {
             parallel {
