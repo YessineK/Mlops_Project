@@ -88,6 +88,7 @@ pipeline {
             steps {
                 echo '🧪 Validation du modèle avec Deepchecks...'
                 sh '''
+                    set -x  # Active le mode debug
                     set +e  # Ne pas arrêter sur erreur
                     
                     echo "📦 Installation de Deepchecks avec NumPy compatible..."
@@ -95,44 +96,29 @@ pipeline {
                     
                     echo ""
                     echo "🔍 Vérification des versions..."
-                    python3 -c "import numpy; print(f'NumPy: {numpy.__version__}')" || echo "NumPy import échoué"
-                    python3 -c "import deepchecks; print(f'Deepchecks: {deepchecks.__version__}')" || echo "Deepchecks import échoué"
-                    
-                    echo ""
-                    echo "📂 Répertoire actuel:"
-                    pwd
-                    
-                    echo ""
-                    echo "📂 Contenu avant exécution:"
-                    ls -la testing/ || echo "Dossier testing/ introuvable"
+                    python3 -c "import numpy; print('NumPy:', numpy.__version__)"
+                    python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)"
                     
                     echo ""
                     echo "🔍 Exécution de Deepchecks..."
                     cd testing
                     python3 run_deepchecks.py
-                    DEEPCHECKS_EXIT=$?
                     
                     echo ""
-                    echo "📊 Code de sortie Deepchecks: $DEEPCHECKS_EXIT"
+                    echo "📋 Fichiers générés:"
+                    ls -lh *.html
                     
                     echo ""
-                    echo "📋 Fichiers HTML générés dans testing/:"
-                    ls -lh *.html 2>/dev/null || echo "❌ Aucun fichier HTML trouvé"
+                    echo "📂 Copie vers monitoring..."
+                    cp -v deepchecks_summary.html ../monitoring/ || echo "Erreur copie summary"
+                    cp -v data_integrity_report.html ../monitoring/ || echo "Erreur copie integrity"
+                    cp -v train_test_validation_report.html ../monitoring/ || echo "Erreur copie validation"
+                    cp -v model_evaluation_report.html ../monitoring/ || echo "Erreur copie evaluation"
                     
                     echo ""
-                    echo "📂 Copie vers monitoring/..."
-                    if ls *.html 1> /dev/null 2>&1; then
-                        cp -v *.html ../monitoring/
-                        echo "✅ Fichiers copiés"
-                    else
-                        echo "❌ Aucun fichier à copier"
-                    fi
+                    echo "📋 Vérification dans monitoring:"
+                    ls -lh ../monitoring/deepchecks*.html ../monitoring/data_integrity*.html ../monitoring/train_test*.html ../monitoring/model_evaluation*.html
                     
-                    echo ""
-                    echo "📋 Vérification dans monitoring/:"
-                    ls -lh ../monitoring/*.html 2>/dev/null | grep deepchecks || echo "❌ Pas de fichiers Deepchecks dans monitoring/"
-                    
-                    echo ""
                     echo "✅ Deepchecks terminé"
                     exit 0
                 '''
