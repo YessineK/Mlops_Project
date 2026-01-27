@@ -88,38 +88,20 @@ pipeline {
             steps {
                 echo '🧪 Validation du modèle avec Deepchecks...'
                 sh '''
-                    set +e  # Ne pas arrêter sur erreur
+                    set +e
                     
-                    echo "🗑️ DÉSINSTALLATION de NumPy existant..."
-                    pip3 uninstall -y numpy
-                    
-                    echo ""
-                    echo "📦 Installation de NumPy 1.26.4 (compatible)..."
-                    pip3 install --break-system-packages "numpy==1.26.4"
-                    
-                    echo ""
                     echo "📦 Installation de Deepchecks..."
                     pip3 install --break-system-packages setuptools deepchecks
                     
                     echo ""
-                    echo "🔍 Vérification des versions APRÈS installation:"
-                    python3 -c "import numpy; print('NumPy version:', numpy.__version__)"
-                    python3 -c "import sys; print('Python:', sys.version)"
-                    
-                    echo ""
-                    echo "🧪 Test d'import Deepchecks:"
-                    python3 -c "from deepchecks.tabular import Dataset; print('✅ Deepchecks OK')" || echo "❌ Deepchecks FAILED"
+                    echo "🔍 Vérification des versions:"
+                    python3 -c "import numpy; print('NumPy:', numpy.__version__)"
+                    python3 -c "import sklearn; print('Scikit-learn:', sklearn.__version__)"
                     
                     echo ""
                     echo "🔍 Exécution de Deepchecks..."
                     cd testing
                     python3 run_deepchecks.py
-                    EXIT_CODE=$?
-                    echo "Exit code: $EXIT_CODE"
-                    
-                    echo ""
-                    echo "📋 Fichiers générés:"
-                    ls -lh *.html 2>/dev/null || echo "❌ AUCUN FICHIER HTML GÉNÉRÉ"
                     
                     echo ""
                     echo "✅ Stage terminé"
