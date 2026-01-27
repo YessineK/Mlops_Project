@@ -115,21 +115,49 @@ pipeline {
                     echo "📦 Installation d'Evidently..."
                     pip3 install --break-system-packages 'evidently<0.4.0'
                     
-                    # RÉINSTALLER scikit-learn 1.5.2 après Evidently
                     echo "🔧 Réinstallation de scikit-learn 1.5.2..."
                     pip3 install --break-system-packages scikit-learn==1.5.2 --force-reinstall
                     
                     echo ""
-                    echo "📂 Préparation des données..."
+                    echo "📂 Préparation et génération des rapports..."
                     cd monitoring
                     python3 prepare_data.py
                     
                     echo ""
-                    echo "📊 Génération du rapport de drift..."
-                    python3 data_drift_monitoring.py
+                    echo "📊 Génération du rapport Evidently..."
+                    python3 generate_report.py
+                    
+                    echo ""
+                    echo "📈 Génération du rapport de performance..."
+                    python3 performance_report.py
+                    
+                    echo ""
+                    echo "🔀 Combinaison des rapports..."
+                    python3 combine_reports.py
+                    
+                    echo ""
+                    echo "✅ Rapports générés avec succès!"
+                    ls -lh *.html *.json 2>/dev/null || echo "Aucun rapport trouvé"
                 '''
             }
         }
+
+        stage('📄 Archive Monitoring Reports') {
+            steps {
+                echo '📄 Archivage des rapports de monitoring...'
+                
+                archiveArtifacts artifacts: 'monitoring/*.html',
+                                allowEmptyArchive: true,
+                                fingerprint: true
+                
+                archiveArtifacts artifacts: 'monitoring/*.json',
+                                allowEmptyArchive: true,
+                                fingerprint: true
+                
+                echo '✅ Rapports de monitoring archivés'
+            }
+        }
+
         stage('📊 Publish Monitoring Report') {
             steps {
                 echo '🌐 Publication du rapport de monitoring...'
@@ -148,8 +176,6 @@ pipeline {
                 '''
             }
         }
-                
-
         stage('🐳 Build Docker Images') {
             parallel {
                 stage('Build Backend Image') {
