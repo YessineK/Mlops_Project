@@ -95,28 +95,50 @@ pipeline {
                     
                     echo ""
                     echo "🔍 Vérification des versions..."
-                    python3 -c "import numpy; print(f'NumPy: {numpy.__version__}')" || true
-                    python3 -c "import deepchecks; print(f'Deepchecks: {deepchecks.__version__}')" || true
+                    python3 -c "import numpy; print(f'NumPy: {numpy.__version__}')" || echo "NumPy import échoué"
+                    python3 -c "import deepchecks; print(f'Deepchecks: {deepchecks.__version__}')" || echo "Deepchecks import échoué"
+                    
+                    echo ""
+                    echo "📂 Répertoire actuel:"
+                    pwd
+                    
+                    echo ""
+                    echo "📂 Contenu avant exécution:"
+                    ls -la testing/ || echo "Dossier testing/ introuvable"
                     
                     echo ""
                     echo "🔍 Exécution de Deepchecks..."
                     cd testing
                     python3 run_deepchecks.py
+                    DEEPCHECKS_EXIT=$?
                     
                     echo ""
-                    echo "📋 Fichiers générés:"
-                    ls -lh *.html 2>/dev/null || echo "Aucun fichier HTML"
+                    echo "📊 Code de sortie Deepchecks: $DEEPCHECKS_EXIT"
                     
                     echo ""
-                    echo "📂 Copie vers monitoring..."
-                    cp *.html ../monitoring/ 2>/dev/null || echo "Pas de fichiers à copier"
+                    echo "📋 Fichiers HTML générés dans testing/:"
+                    ls -lh *.html 2>/dev/null || echo "❌ Aucun fichier HTML trouvé"
                     
+                    echo ""
+                    echo "📂 Copie vers monitoring/..."
+                    if ls *.html 1> /dev/null 2>&1; then
+                        cp -v *.html ../monitoring/
+                        echo "✅ Fichiers copiés"
+                    else
+                        echo "❌ Aucun fichier à copier"
+                    fi
+                    
+                    echo ""
+                    echo "📋 Vérification dans monitoring/:"
+                    ls -lh ../monitoring/*.html 2>/dev/null | grep deepchecks || echo "❌ Pas de fichiers Deepchecks dans monitoring/"
+                    
+                    echo ""
                     echo "✅ Deepchecks terminé"
                     exit 0
                 '''
             }
         }
-        
+                
         stage('🔍 Validate Model Files') {
             steps {
                 echo '🔍 Validation des fichiers du modèle...'
