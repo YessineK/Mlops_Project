@@ -258,30 +258,51 @@ pipeline {
                 '''
             }
         }
-        stage('🚀 Push to Docker Hub - TEST') {
+
+        stage('🚀 Push to Docker Hub') {
             steps {
                 script {
-                    echo '📤 TEST: Push UNE SEULE image...'
+                    echo '📤 Push des images vers Docker Hub...'
                     
-                    withCredentials([usernamePassword(
-                        credentialsId: 'docker-hub-credentials',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )]) {
-                        sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            
-                            # TEST: Push SEULEMENT backend:latest
-                            echo "📤 Push backend:latest..."
-                            timeout 300 docker push ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST} || echo "TIMEOUT après 5 min"
-                            
-                            docker logout
-                        '''
-                    }
+                    timeout(time: 5, unit: 'MINUTES') {  // ⭐ SEULEMENT CETTE LIGNE À AJOUTER
+                        withCredentials([usernamePassword(
+                            credentialsId: 'docker-hub-credentials',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )]) {
+                            sh '''
+                                echo "🔐 Connexion à Docker Hub..."
+                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                
+                                echo ""
+                                echo "📤 Push Backend images..."
+                                docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
+                                echo "✅ Pushed: ${BACKEND_IMAGE}:${IMAGE_TAG}"
+                                
+                                docker push ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST}
+                                echo "✅ Pushed: ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST}"
+                                
+                                echo ""
+                                echo "📤 Push Frontend images..."
+                                docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
+                                echo "✅ Pushed: ${FRONTEND_IMAGE}:${IMAGE_TAG}"
+                                
+                                docker push ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST}
+                                echo "✅ Pushed: ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST}"
+                                
+                                echo ""
+                                echo "✅ Toutes les images ont été pushées avec succès!"
+                                
+                                echo ""
+                                echo "🔓 Déconnexion de Docker Hub..."
+                                docker logout
+                            '''
+                        }
+                    }  // ⭐ FERMETURE DU TIMEOUT
                 }
             }
         }
-
+        
         stage('🚀 Deploy Application') {
             steps {
                 echo '🚀 Déploiement de l\'application...'
