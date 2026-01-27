@@ -258,7 +258,29 @@ pipeline {
                 '''
             }
         }
-        
+        stage('🚀 Push to Docker Hub - TEST') {
+            steps {
+                script {
+                    echo '📤 TEST: Push UNE SEULE image...'
+                    
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-hub-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            
+                            # TEST: Push SEULEMENT backend:latest
+                            echo "📤 Push backend:latest..."
+                            timeout 300 docker push ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST} || echo "TIMEOUT après 5 min"
+                            
+                            docker logout
+                        '''
+                    }
+                }
+            }
+        }
         stage('🚀 Push to Docker Hub') {
             steps {
                 script {
