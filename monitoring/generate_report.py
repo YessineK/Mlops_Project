@@ -522,7 +522,7 @@ def main():
         print("\n✅ Aucune alerte de performance.")
 
     print("\n" + "="*80)
-    print("✅ MONITORING TERMINÉ (drift + performance)")
+    print("✅ MONITORING TERMINÉe (drift + performance)")
     print("="*80)
     print(f"\n📊 Rapports générés:")
     print(f"   - monitoring_report.html")
