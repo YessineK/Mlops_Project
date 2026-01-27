@@ -110,25 +110,26 @@ pipeline {
                 sh '''
                     set +e
                     
-                    echo "🗑️ Désinstallation complète de scikit-learn..."
-                    pip3 uninstall -y scikit-learn
+                    echo "📦 Installation de IPython 8.18.1 (compatible)..."
+                    pip3 install --break-system-packages "ipython==8.18.1"
                     
                     echo ""
-                    echo "📦 Installation de scikit-learn 1.3.2 (compatible Deepchecks 0.17.3)..."
-                    pip3 install --break-system-packages "scikit-learn==1.3.2"
+                    echo "📦 Installation de ipywidgets 8.1.1..."
+                    pip3 install --break-system-packages "ipywidgets==8.1.1"
                     
                     echo ""
-                    echo "📦 Installation de Deepchecks 0.17.3..."
+                    echo "📦 Installation de Deepchecks 0.17.3 (SANS dépendances)..."
                     pip3 install --break-system-packages "deepchecks==0.17.3" --no-deps
                     
                     echo ""
-                    echo "📦 Installation manuelle des dépendances Deepchecks..."
-                    pip3 install --break-system-packages pandas numpy scipy plotly matplotlib requests jsonpickle tqdm statsmodels
+                    echo "📦 Installation manuelle des dépendances..."
+                    pip3 install --break-system-packages pandas numpy scipy plotly matplotlib requests jsonpickle tqdm statsmodels category-encoders PyNomaly beautifulsoup4 ipykernel jupyter-client
                     
                     echo ""
                     echo "🔍 Vérification des versions:"
                     python3 -c "import sklearn; print('Scikit-learn:', sklearn.__version__)"
-                    python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)"
+                    python3 -c "import IPython; print('IPython:', IPython.__version__)"
+                    python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)" || echo "❌ Deepchecks import failed"
                     
                     echo ""
                     echo "🗑️ Suppression des anciens rapports..."
@@ -151,7 +152,7 @@ pipeline {
                     exit 0
                 '''
             }
-        }
+}
         stage('📂 Copy Deepchecks Reports') {
             steps {
                 echo '📂 Copie des rapports Deepchecks vers monitoring...'
