@@ -59,6 +59,10 @@ backend/src/processors/*.pkl
 data/raw/
 data/processed/
 
+# Exceptions - Fichiers CSV à tracker pour le monitoring
+!monitoring/data/churn2.csv
+!monitoring/data/prod_*.csv
+
 # Exceptions - Fichiers à garder
 !notebooks/processors/preprocessor.pkl
 !notebooks/processors/feature_names.pkl
@@ -69,6 +73,8 @@ data/processed/
 .coverage
 htmlcov/
 
-# Monitoring
+# Monitoring - Rapports générés (ignorés)
 monitoring/*.html
 monitoring/*.json
+monitoring/data/reference_data.csv
+monitoring/data/current_data.csv
