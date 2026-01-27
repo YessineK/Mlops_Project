@@ -88,7 +88,6 @@ pipeline {
             steps {
                 echo '🧪 Validation du modèle avec Deepchecks...'
                 sh '''
-                    set -x  # Active le mode debug
                     set +e  # Ne pas arrêter sur erreur
                     
                     echo "📦 Installation de Deepchecks avec NumPy compatible..."
@@ -96,8 +95,8 @@ pipeline {
                     
                     echo ""
                     echo "🔍 Vérification des versions..."
-                    python3 -c "import numpy; print('NumPy:', numpy.__version__)"
-                    python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)"
+                    python3 -c "import numpy; print('NumPy:', numpy.__version__)" || true
+                    python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)" || true
                     
                     echo ""
                     echo "🔍 Exécution de Deepchecks..."
@@ -106,25 +105,39 @@ pipeline {
                     
                     echo ""
                     echo "📋 Fichiers générés:"
-                    ls -lh *.html
+                    ls -lh *.html 2>/dev/null || echo "Aucun fichier HTML"
                     
                     echo ""
-                    echo "📂 Copie vers monitoring..."
-                    cp -v deepchecks_summary.html ../monitoring/ || echo "Erreur copie summary"
-                    cp -v data_integrity_report.html ../monitoring/ || echo "Erreur copie integrity"
-                    cp -v train_test_validation_report.html ../monitoring/ || echo "Erreur copie validation"
-                    cp -v model_evaluation_report.html ../monitoring/ || echo "Erreur copie evaluation"
-                    
-                    echo ""
-                    echo "📋 Vérification dans monitoring:"
-                    ls -lh ../monitoring/deepchecks*.html ../monitoring/data_integrity*.html ../monitoring/train_test*.html ../monitoring/model_evaluation*.html
-                    
                     echo "✅ Deepchecks terminé"
                     exit 0
                 '''
             }
         }
-                
+        
+        stage('📂 Copy Deepchecks Reports') {
+            steps {
+                echo '📂 Copie des rapports Deepchecks vers monitoring...'
+                sh '''
+                    echo "📋 Fichiers Deepchecks générés:"
+                    ls -lh testing/*.html 2>/dev/null | grep -E "(deepchecks|integrity|validation|evaluation)" || echo "Aucun fichier trouvé"
+                    
+                    echo ""
+                    echo "📂 Copie vers monitoring/..."
+                    cp -v testing/deepchecks_summary.html monitoring/ 2>/dev/null && echo "✅ summary copié" || echo "⚠️ summary non trouvé"
+                    cp -v testing/data_integrity_report.html monitoring/ 2>/dev/null && echo "✅ integrity copié" || echo "⚠️ integrity non trouvé"
+                    cp -v testing/train_test_validation_report.html monitoring/ 2>/dev/null && echo "✅ validation copié" || echo "⚠️ validation non trouvé"
+                    cp -v testing/model_evaluation_report.html monitoring/ 2>/dev/null && echo "✅ evaluation copié" || echo "⚠️ evaluation non trouvé"
+                    
+                    echo ""
+                    echo "📋 Vérification dans monitoring/:"
+                    ls -lh monitoring/*.html 2>/dev/null | grep -E "(deepchecks|integrity|validation|evaluation)" || echo "Aucun fichier Deepchecks dans monitoring/"
+                    
+                    echo ""
+                    echo "✅ Copie terminée"
+                '''
+            }
+        }
+        
         stage('🔍 Validate Model Files') {
             steps {
                 echo '🔍 Validation des fichiers du modèle...'
@@ -355,6 +368,10 @@ pipeline {
                     echo "  Frontend UI:  http://localhost:8501"
                     echo "  Monitoring:   http://localhost:9000"
                     echo ""
+                    echo "📊 Rapports disponibles:"
+                    echo "  • Evidently (Drift + Performance)"
+                    echo "  • Deepchecks (Validation Qualité)"
+                    echo ""
                     echo "✅ Build terminé avec succès!"
                     echo "================================"
                 '''
@@ -384,7 +401,7 @@ pipeline {
                 echo "📊 Accès aux services:"
                 echo "   • Backend:    http://localhost:8000"
                 echo "   • Frontend:   http://localhost:8501"
-                echo "   • Monitoring: http://localhost:9000"
+                echo "   • Monitoring: http://localhost:9000 (Evidently + Deepchecks)"
             }
         }
         
