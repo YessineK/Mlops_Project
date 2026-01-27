@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:24-dind'
+            args '-v /var/run/docker.sock:/var/run/docker.sock --privileged'
+        }
+    }
     
     environment {
         DOCKER_HUB_REPO = 'yessinekarray'
@@ -104,56 +109,47 @@ pipeline {
                 '''
             }
         }
-        stage('🧪 Deepchecks Validation') {
+        stage('🧪 Deepchecks Validation (Docker)') {
             steps {
-                echo '🧪 Validation du modèle avec Deepchecks...'
+                echo '🧪 Validation du modèle avec Deepchecks (Docker isolé)...'
                 sh '''
-                    set +e
+                    echo "════════════════════════════════════════════════════════"
+                    echo "  🐳 DEEPCHECKS AVEC DOCKER-IN-DOCKER"
+                    echo "════════════════════════════════════════════════════════"
+                    echo ""
                     
-                    echo "🗑️ Désinstallation complète..."
-                    pip3 uninstall -y pandas scikit-learn ipython ipywidgets pyzmq
+                    # Vérifier que Docker est disponible
+                    if ! command -v docker &> /dev/null; then
+                        echo "❌ Docker n'est pas disponible"
+                        echo "💡 Installation de Docker..."
+                        
+                        # Sur Ubuntu/Debian
+                        apt-get update
+                        apt-get install -y docker.io
+                    fi
+                    
+                    # Vérifier que le daemon Docker est accessible
+                    if ! docker ps &> /dev/null; then
+                        echo "❌ Docker daemon non accessible"
+                        echo "💡 Assurez-vous que Jenkins a accès à /var/run/docker.sock"
+                        exit 1
+                    fi
+                    
+                    echo "✅ Docker disponible"
+                    echo ""
+                    
+                    # Rendre le script exécutable
+                    chmod +x run_deepchecks_docker.sh
+                    
+                    # Exécuter le script Docker
+                    ./run_deepchecks_docker.sh || {
+                        echo "⚠️ Deepchecks a échoué mais on continue"
+                        exit 0
+                    }
                     
                     echo ""
-                    echo "📦 Installation de l'écosystème compatible Deepchecks 0.17.3..."
-                    pip3 install --break-system-packages "pandas==1.5.3"
-                    pip3 install --break-system-packages "scikit-learn==1.3.2" || echo "⚠️ scikit-learn 1.3.2 failed, using 1.4.2"
-                    pip3 install --break-system-packages "scikit-learn==1.4.2"
-                    pip3 install --break-system-packages "ipython==7.34.0"
-                    pip3 install --break-system-packages "ipywidgets==7.8.5"
-                    pip3 install --break-system-packages "pyzmq==23.2.1" || echo "⚠️ pyzmq build failed, skipping"
-                    
-                    echo ""
-                    echo "📦 Installation de Deepchecks 0.17.3..."
-                    pip3 install --break-system-packages "deepchecks==0.17.3" --no-deps
-                    
-                    echo ""
-                    echo "📦 Installation des autres dépendances..."
-                    pip3 install --break-system-packages numpy scipy plotly matplotlib requests jsonpickle tqdm statsmodels category-encoders PyNomaly beautifulsoup4 ipykernel jupyter-client
-                    
-                    echo ""
-                    echo "🔍 Vérification des versions:"
-                    python3 -c "import pandas; print('Pandas:', pandas.__version__)"
-                    python3 -c "import sklearn; print('Scikit-learn:', sklearn.__version__)"
-                    python3 -c "import IPython; print('IPython:', IPython.__version__)"
-                    python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)" || echo "❌ Deepchecks import failed"
-                    
-                    echo ""
-                    echo "🗑️ Suppression des anciens rapports..."
-                    rm -f testing/*.html
-                    
-                    echo ""
-                    echo "🔍 Exécution de Deepchecks..."
-                    cd testing
-                    python3 run_deepchecks.py
-                    EXIT_CODE=$?
-                    
-                    echo ""
-                    echo "📊 Exit code: $EXIT_CODE"
-                    echo ""
-                    echo "📋 Fichiers générés:"
-                    ls -lh *.html 2>/dev/null || echo "❌ Aucun fichier HTML"
-                    
-                    exit 0
+                    echo "📂 Rapports générés:"
+                    ls -lh testing/*.html 2>/dev/null || echo "Aucun rapport trouvé"
                 '''
             }
         }
