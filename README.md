@@ -816,7 +816,7 @@ log_prediction(user_id, model_version, prediction, actual)
 
 ### **Master 2 Data Science - Université Claude Bernard Lyon 1**
 
-Ce projet a été réalisé dans le cadre du Master 2 Data Science à l'**Université Claude Bernard Lyon 1** (UCBL).
+Ce projet a été réalisé dans le cadre du Master 2 Data Science à l'**Université Claude Bernard Lyon 1** .
 
 #### **Contributions principales:**
 
