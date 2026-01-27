@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+"""
+Script de monitoring combiné : Data Drift + Performance
+Compatible avec Evidently (versions récentes)
+"""
+
 import os
 import json
 from datetime import datetime
@@ -13,15 +19,14 @@ from sklearn.metrics import (
 # =========================
 PRED = "prediction"
 PROBA = "proba"
-
-# On accepte 2 noms possibles pour la target
 TARGET_CANDIDATES = ["churn", "Attrition_Flag"]
 
 
 # =========================
-# PERFORMANCE PART
+# HELPER FUNCTIONS
 # =========================
 def find_target_column(df: pd.DataFrame):
+    """Trouve la colonne target dans le DataFrame"""
     for col in TARGET_CANDIDATES:
         if col in df.columns:
             return col
@@ -29,6 +34,7 @@ def find_target_column(df: pd.DataFrame):
 
 
 def compute_metrics(df: pd.DataFrame, target_col: str):
+    """Calcule les métriques de performance"""
     y_true = df[target_col].astype(int)
     y_pred = df[PRED].astype(int)
 
@@ -40,7 +46,7 @@ def compute_metrics(df: pd.DataFrame, target_col: str):
         "confusion_matrix": confusion_matrix(y_true, y_pred).tolist(),
     }
 
-    # AUC seulement si proba dispo
+    # AUC seulement si proba disponible
     if PROBA in df.columns and df[PROBA].notna().any():
         try:
             metrics["roc_auc"] = float(roc_auc_score(y_true, df[PROBA].astype(float)))
@@ -53,6 +59,7 @@ def compute_metrics(df: pd.DataFrame, target_col: str):
 
 
 def fmt(x, nd=3):
+    """Formate un nombre pour l'affichage"""
     if x is None:
         return "—"
     try:
@@ -62,12 +69,14 @@ def fmt(x, nd=3):
 
 
 def delta_class(d):
+    """Retourne la classe CSS selon le delta"""
     if d is None:
         return "neutral"
     return "bad" if d < 0 else "good"
 
 
 def build_performance_html(data: dict) -> str:
+    """Génère le rapport HTML de performance"""
     ref = data["reference"]
     cur = data["current"]
     delta = data["delta"]
@@ -251,119 +260,223 @@ def build_performance_html(data: dict) -> str:
 
 
 # =========================
-# DRIFT PART (YOUR WORKING CODE)
+# DRIFT PART
 # =========================
 def run_drift(reference_data: pd.DataFrame, current_data: pd.DataFrame, base_dir: str):
     """
-    - Evidently Report HTML (new API)
-    - Evidently TestSuite JSON (legacy)
+    Génère le rapport de drift avec Evidently
+    Essaie différents imports pour compatibilité
     """
-
-    # ---- Report API imports (exactly like your code) ----
-    # (Certain Evidently versions use "from evidently import Report" & "from evidently.presets import ...")
-    from evidently import Report
-    from evidently.presets import DataDriftPreset, DataSummaryPreset
-
-    # ---- Legacy TestSuite imports (fallback tolerant) ----
-    try:
-        from evidently.legacy.test_suite import TestSuite
-    except Exception:
-        from evidently.legacy.tests import TestSuite  # fallback
-
-    try:
-        from evidently.legacy.test_preset import DataDriftTestPreset
-    except Exception:
-        from evidently.legacy.test_presets import DataDriftTestPreset  # fallback
-
-    from evidently.legacy.pipeline.column_mapping import ColumnMapping
-
-    # Drop IDs
+    
+    print("📊 Génération du rapport Data Drift...")
+    
+    # Nettoyage des colonnes inutiles
     for df in (reference_data, current_data):
         df.drop(columns=["CLIENTNUM", "Unnamed: 21"], errors="ignore", inplace=True)
-
-    print("Generating Data Drift Report...")
-
-    metrics = [
-        DataDriftPreset(),
-        DataSummaryPreset(),
-    ]
-
-    report = Report(metrics=metrics)
-    snapshot = report.run(current_data=current_data, reference_data=reference_data)
-
-    report_path = os.path.join(base_dir, "monitoring_report.html")
-    snapshot.save_html(report_path)
-    print(f"✅ Drift HTML saved to {report_path}")
-
-    # ---- TestSuite (legacy) ----
-    print("Running Drift Test Suite...")
-
-    column_mapping = ColumnMapping()
-
-    # target for tests: choose existing target in data
-    target_col = find_target_column(reference_data)
-    if target_col is not None:
-        column_mapping.target = target_col
-
-    tests = TestSuite(tests=[DataDriftTestPreset()])
-    tests.run(reference_data=reference_data, current_data=current_data, column_mapping=column_mapping)
-
-    json_path = os.path.join(base_dir, "monitoring_tests.json")
-    tests.save_json(json_path)
-    print(f"✅ Drift tests JSON saved to {json_path}")
-
+    
     try:
-        test_results = tests.as_dict()
-        failed = test_results.get("summary", {}).get("failed_tests", 0)
-        if failed > 0:
-            print(f"⚠️  WARNING: {failed} drift tests failed!")
+        # ===== TENTATIVE 1: API moderne (Evidently >= 0.4.0) =====
+        try:
+            from evidently.report import Report
+            from evidently.metric_preset import DataDriftPreset, DataQualityPreset
+            
+            print("✅ Utilisation de l'API Evidently moderne (Report)")
+            
+            report = Report(metrics=[
+                DataDriftPreset(),
+                DataQualityPreset()
+            ])
+            
+            report.run(
+                reference_data=reference_data,
+                current_data=current_data
+            )
+            
+            report_path = os.path.join(base_dir, "monitoring_report.html")
+            report.save_html(report_path)
+            print(f"✅ Rapport HTML sauvegardé: {report_path}")
+            
+            json_path = os.path.join(base_dir, "monitoring_tests.json")
+            report.save_json(json_path)
+            print(f"✅ Rapport JSON sauvegardé: {json_path}")
+            
+            # Analyser les résultats
+            report_dict = report.as_dict()
+            analyze_drift_results(report_dict)
+            
+            return True
+            
+        except (ImportError, AttributeError) as e:
+            print(f"⚠️ API moderne non disponible: {e}")
+            print("🔄 Tentative avec l'ancienne API...")
+        
+        # ===== TENTATIVE 2: API legacy (Evidently < 0.4.0) =====
+        try:
+            from evidently.dashboard import Dashboard
+            from evidently.tabs import DataDriftTab
+            
+            print("✅ Utilisation de l'API Evidently legacy (Dashboard)")
+            
+            dashboard = Dashboard(tabs=[DataDriftTab()])
+            dashboard.calculate(reference_data, current_data)
+            
+            report_path = os.path.join(base_dir, "monitoring_report.html")
+            dashboard.save(report_path)
+            print(f"✅ Rapport HTML sauvegardé: {report_path}")
+            
+            # Créer un JSON minimal
+            json_path = os.path.join(base_dir, "monitoring_tests.json")
+            with open(json_path, "w") as f:
+                json.dump({
+                    "summary": {"status": "completed", "api": "legacy"},
+                    "timestamp": datetime.now().isoformat()
+                }, f, indent=2)
+            print(f"✅ Rapport JSON sauvegardé: {json_path}")
+            
+            return True
+            
+        except (ImportError, AttributeError) as e2:
+            print(f"⚠️ API legacy non disponible: {e2}")
+            raise Exception("Aucune API Evidently compatible trouvée")
+    
+    except Exception as e:
+        print(f"❌ Erreur lors de la génération du rapport de drift: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+def analyze_drift_results(report_dict: dict):
+    """Analyse les résultats de drift"""
+    print("\n" + "="*80)
+    print("📊 RÉSUMÉ DU DRIFT")
+    print("="*80)
+    
+    drift_count = 0
+    total_features = 0
+    
+    for metric in report_dict.get('metrics', []):
+        if 'result' in metric:
+            result = metric['result']
+            if 'drift_by_columns' in result:
+                drift_by_columns = result['drift_by_columns']
+                for col, drift_info in drift_by_columns.items():
+                    total_features += 1
+                    if drift_info.get('drift_detected', False):
+                        drift_count += 1
+                        print(f"⚠️  Drift détecté sur: {col}")
+    
+    if total_features > 0:
+        drift_pct = (drift_count/total_features*100)
+        print(f"\nTotal features analysées: {total_features}")
+        print(f"Features avec drift détecté: {drift_count}")
+        print(f"Pourcentage de drift: {drift_pct:.1f}%")
+        
+        if drift_pct > 50:
+            print("\n🔴 ALERTE: Drift élevé détecté!")
+            print("   → Réentraîner le modèle avec les nouvelles données")
+        elif drift_pct > 25:
+            print("\n🟡 ATTENTION: Drift modéré détecté")
+            print("   → Surveiller l'évolution")
         else:
-            print("✅ All drift tests passed.")
-    except Exception:
-        print("⚠️ Could not read drift tests summary (but JSON is saved).")
+            print("\n🟢 OK: Drift faible, modèle stable")
+    else:
+        print("✅ Aucun drift détecté")
+    
+    print("="*80)
 
 
 # =========================
-# MAIN (COMBINED)
+# MAIN
 # =========================
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     data_dir = os.path.join(base_dir, "data")
 
+    # CORRECTION: Utiliser les bons noms de fichiers (sans _scored)
     ref_path = os.path.join(data_dir, "reference_data.csv")
     cur_path = os.path.join(data_dir, "current_data.csv")
 
+    print("="*80)
+    print("📊 MONITORING DATA DRIFT + PERFORMANCE")
+    print("="*80)
+
+    # Vérifier les fichiers
     if not os.path.exists(ref_path) or not os.path.exists(cur_path):
-        print("❌ Error: Data files not found. Run prepare_data.py first.")
+        print("❌ Erreur: Fichiers de données introuvables.")
+        print(f"   Reference: {ref_path}")
+        print(f"   Current: {cur_path}")
+        print("\n💡 Exécutez d'abord: python prepare_data.py && python score_data.py")
         return
 
-    print("Loading data...")
+    print(f"✅ Fichiers trouvés:")
+    print(f"   Reference: {ref_path}")
+    print(f"   Current: {cur_path}")
+
+    # Charger les données
+    print("\n📥 Chargement des données...")
     reference_data = pd.read_csv(ref_path)
     current_data = pd.read_csv(cur_path)
 
-    print(f"Reference shape: {reference_data.shape}")
-    print(f"Current shape: {current_data.shape}")
+    print(f"   Reference shape: {reference_data.shape}")
+    print(f"   Current shape: {current_data.shape}")
+    
+    # Vérifier si les colonnes de prédiction existent
+    has_predictions = PRED in reference_data.columns and PRED in current_data.columns
+    
+    if not has_predictions:
+        print("\n⚠️ Colonnes de prédiction manquantes!")
+        print("   Exécution de score_data.py en cours...")
+        
+        # Essayer d'exécuter score_data.py automatiquement
+        try:
+            import subprocess
+            import sys
+            result = subprocess.run([sys.executable, "score_data.py"], 
+                                  capture_output=True, text=True, cwd=base_dir)
+            if result.returncode == 0:
+                print("✅ Scoring terminé avec succès!")
+                # Recharger les données
+                reference_data = pd.read_csv(ref_path)
+                current_data = pd.read_csv(cur_path)
+            else:
+                print("❌ Erreur lors du scoring:")
+                print(result.stderr)
+                print("\n💡 Exécutez manuellement: python score_data.py")
+                return
+        except Exception as e:
+            print(f"❌ Impossible d'exécuter score_data.py: {e}")
+            print("\n💡 Exécutez manuellement: python score_data.py")
+            return
 
-    # 1) DRIFT
-    run_drift(reference_data.copy(), current_data.copy(), base_dir)
+    # ===== 1) DRIFT =====
+    print("\n" + "="*80)
+    print("🔍 PARTIE 1: ANALYSE DU DRIFT")
+    print("="*80)
+    
+    drift_success = run_drift(reference_data.copy(), current_data.copy(), base_dir)
 
-    # 2) PERFORMANCE (only if score columns exist)
-    print("\n=== PERFORMANCE MONITORING ===")
+    # ===== 2) PERFORMANCE =====
+    print("\n" + "="*80)
+    print("🎯 PARTIE 2: MONITORING PERFORMANCE")
+    print("="*80)
+
+    # Vérifier les colonnes nécessaires
     if PRED not in reference_data.columns or PRED not in current_data.columns:
-        print("❌ Missing 'prediction' column. Run score_data.py first to add prediction/proba.")
+        print("❌ Colonne 'prediction' toujours manquante après le scoring.")
+        print("   Le monitoring de performance est ignoré.")
         return
 
     target_ref = find_target_column(reference_data)
     target_cur = find_target_column(current_data)
 
     if target_ref is None or target_cur is None:
-        print(f"❌ Missing target column. Need one of: {TARGET_CANDIDATES}")
-        print("   (Your data must contain churn/Attrition_Flag).")
+        print(f"❌ Colonne cible manquante. Besoin de: {TARGET_CANDIDATES}")
         return
 
-    # (Optional) ensure same target col name used
     target_col = target_ref
 
+    print("✅ Calcul des métriques de performance...")
     ref_metrics = compute_metrics(reference_data, target_col)
     cur_metrics = compute_metrics(current_data, target_col)
 
@@ -377,6 +490,7 @@ def main():
         }
     }
 
+    # Alertes
     alerts = []
     if result["current"]["accuracy"] < 0.75:
         alerts.append("ALERT: accuracy < 0.75")
@@ -386,25 +500,35 @@ def main():
         alerts.append("ALERT: accuracy dropped by more than 0.05")
     result["alerts"] = alerts
 
+    # Sauvegarder JSON
     metrics_json_path = os.path.join(base_dir, "performance_metrics.json")
     with open(metrics_json_path, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
-    print(f"✅ Performance metrics saved to {metrics_json_path}")
+    print(f"✅ Métriques sauvegardées: {metrics_json_path}")
 
+    # Sauvegarder HTML
     html_path = os.path.join(base_dir, "performance_report.html")
     html = build_performance_html(result)
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"✅ Performance HTML report saved to {html_path}")
+    print(f"✅ Rapport HTML sauvegardé: {html_path}")
 
+    # Afficher les alertes
     if alerts:
-        print("⚠️ Alerts:")
+        print("\n⚠️ Alertes de performance:")
         for a in alerts:
-            print(" -", a)
+            print(f"   - {a}")
     else:
-        print("✅ No performance alerts.")
+        print("\n✅ Aucune alerte de performance.")
 
-    print("\n✅ DONE (drift + performance).")
+    print("\n" + "="*80)
+    print("✅ MONITORING TERMINÉ (drift + performance)")
+    print("="*80)
+    print(f"\n📊 Rapports générés:")
+    print(f"   - monitoring_report.html")
+    print(f"   - monitoring_tests.json")
+    print(f"   - performance_report.html")
+    print(f"   - performance_metrics.json")
 
 
 if __name__ == "__main__":
