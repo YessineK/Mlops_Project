@@ -121,13 +121,18 @@ pipeline {
                 echo '📂 Copie des rapports Deepchecks vers monitoring...'
                 sh '''
                     echo "📋 Fichiers Deepchecks générés:"
-                    ls -lh testing/*.html 2>/dev/null
+                    ls -lh testing/*.html 2>/dev/null || echo "❌ Pas de fichiers HTML"
                     
                     echo ""
                     echo "📂 Copie vers monitoring/..."
-                    cp -v testing/data_distribution_test.html monitoring/ 2>/dev/null && echo "✅ data_distribution copié" || echo "⚠️ data_distribution non trouvé"
-                    cp -v testing/result_integrity_test.html monitoring/ 2>/dev/null && echo "✅ result_integrity copié" || echo "⚠️ result_integrity non trouvé"
-                    cp -v testing/result_model_test.html monitoring/ 2>/dev/null && echo "✅ result_model copié" || echo "⚠️ result_model non trouvé"
+                    cp -v testing/deepchecks_summary.html monitoring/ 2>/dev/null && echo "✅ deepchecks_summary copié" || echo "⚠️ deepchecks_summary non trouvé"
+                    cp -v testing/data_integrity_report.html monitoring/ 2>/dev/null && echo "✅ data_integrity copié" || echo "⚠️ data_integrity non trouvé"
+                    cp -v testing/train_test_validation_report.html monitoring/ 2>/dev/null && echo "✅ train_test_validation copié" || echo "⚠️ train_test_validation non trouvé"
+                    cp -v testing/model_evaluation_report.html monitoring/ 2>/dev/null && echo "✅ model_evaluation copié" || echo "⚠️ model_evaluation non trouvé"
+                    
+                    echo ""
+                    echo "📋 Vérification dans monitoring/:"
+                    ls -lh monitoring/*.html 2>/dev/null || echo "❌ Pas de fichiers copiés"
                     
                     echo ""
                     echo "✅ Copie terminée"
