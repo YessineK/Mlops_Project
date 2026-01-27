@@ -8,7 +8,7 @@
 [![Python](https://img.shields.io/badge/Python-3.9+-3776AB)]()
 
 > **Master 2 Data Science - Université Claude Bernard Lyon 1**  
-> Projet de groupe démontrant un pipeline MLOps complet pour la prédiction du churn bancaire
+> Un pipeline MLOps complet pour la prédiction du churn bancaire
 
 ---
 
@@ -42,7 +42,6 @@ Ce projet implémente un **système complet de prédiction du churn bancaire** a
 
 **Programme:** Master 2 Data Science  
 **Institution:** Université Claude Bernard Lyon 1  
-**Type:** Projet de groupe  
 **Objectif pédagogique:** Maîtriser l'ensemble du cycle de vie MLOps, de l'expérimentation à la production
 
 ### 🏆 Résultats Clés
