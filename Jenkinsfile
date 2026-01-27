@@ -111,10 +111,14 @@ pipeline {
         
         stage('📊 Data Drift Monitoring') {
             steps {
-                echo '📊 Vérification du data drift avec Evidently...'
+                echo "📊 Vérification du data drift avec Evidently..."
                 sh '''
                     echo "📦 Installation d'Evidently..."
-                    pip3 install --break-system-packages "evidently<0.4.0"|| true
+                    pip3 install --break-system-packages evidently<0.4.0
+                    
+                    # RÉINSTALLER scikit-learn 1.5.2 après Evidently
+                    echo "🔧 Réinstallation de scikit-learn 1.5.2..."
+                    pip3 install --break-system-packages scikit-learn==1.5.2 --force-reinstall
                     
                     echo ""
                     echo "📂 Préparation des données..."
@@ -122,11 +126,8 @@ pipeline {
                     python3 prepare_data.py
                     
                     echo ""
-                    echo "📊 Génération du rapport de monitoring..."
-                    python3 run_monitoring.py
-                    
-                    echo ""
-                    echo "✅ Monitoring terminé"
+                    echo "📊 Génération du rapport de drift..."
+                    python3 data_drift_monitoring.py
                 '''
             }
         }
