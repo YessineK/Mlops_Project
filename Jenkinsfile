@@ -159,31 +159,41 @@ pipeline {
                 '''
             }
         }
-        stage('🔍 Validate Model Files') {
+        stage('🧪 Deepchecks Validation') {
             steps {
-                echo '🔍 Validation des fichiers du modèle...'
+                echo '🧪 Validation du modèle avec Deepchecks...'
                 sh '''
-                    echo "📂 Vérification de l'existence des fichiers requis..."
+                    set +e
                     
-                    if [ -f "backend/src/processors/models/best_model_final.pkl" ]; then
-                        echo "✅ best_model_final.pkl trouvé"
-                    else
-                        echo "❌ best_model_final.pkl manquant!"
-                        exit 1
-                    fi
+                    echo "📦 Installation de Deepchecks..."
+                    pip3 install --break-system-packages "deepchecks==0.17.3"
                     
-                    if [ -f "backend/src/processors/preprocessor.pkl" ]; then
-                        echo "✅ preprocessor.pkl trouvé"
-                    else
-                        echo "❌ preprocessor.pkl manquant!"
-                        exit 1
-                    fi
+                    echo ""
+                    echo "🔍 Vérification des versions:"
+                    python3 -c "import sklearn; print('Scikit-learn:', sklearn.__version__)"
+                    python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)"
                     
-                    echo "✅ Tous les fichiers requis sont présents"
+                    echo ""
+                    echo "🗑️ Suppression des anciens rapports..."
+                    rm -f testing/*.html
+                    
+                    echo ""
+                    echo "🔍 Exécution de Deepchecks..."
+                    cd testing
+                    python3 run_deepchecks.py
+                    EXIT_CODE=$?
+                    
+                    echo ""
+                    echo "📊 Exit code: $EXIT_CODE"
+                    echo ""
+                    echo "📋 Nouveaux fichiers générés:"
+                    ls -lh *.html 2>/dev/null || echo "❌ Aucun fichier HTML généré"
+                    
+                    exit 0
                 '''
             }
         }
-        
+                
         stage('📊 Data Drift Monitoring') {
             steps {
                 echo '📊 Vérification du data drift avec Evidently...'
