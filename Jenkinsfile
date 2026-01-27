@@ -32,7 +32,15 @@ pipeline {
                 echo '✅ Repository cloné avec succès'
             }
         }
-        
+        stage('🔧 Install System Dependencies') {
+            steps {
+                echo '🔧 Installation des dépendances système...'
+                sh '''
+                    apt-get update
+                    apt-get install -y libgomp1 python3-pip
+                '''
+            }
+        }   
         stage('🔍 Verify Structure') {
             steps {
                 echo '🔍 Vérification de la structure du projet...'
