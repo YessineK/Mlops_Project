@@ -61,7 +61,7 @@ pipeline {
                     
                     echo ""
                     echo "📦 Installation des packages Python requis..."
-                    pip3 install --break-system-packages scikit-learn==1.7.2 imbalanced-learn pandas numpy lightgbm joblib
+                    pip3 install --break-system-packages scikit-learn==1.5.2 imbalanced-learn pandas numpy lightgbm joblib                    
                     echo "✅ Packages Python installés"
                 '''
             }
