@@ -50,7 +50,7 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm \
-                      -v $WORKSPACE:/app \
+                      -v "$WORKSPACE:/app" \
                       python:3.10-slim \
                       bash -c "
                         pip install --no-cache-dir scikit-learn pandas numpy joblib lightgbm &&
@@ -73,7 +73,7 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm \
-                      -v $WORKSPACE:/app \
+                      -v "$WORKSPACE:/app" \
                       python:3.10-slim \
                       bash -c "
                         pip install --no-cache-dir evidently pandas numpy &&
