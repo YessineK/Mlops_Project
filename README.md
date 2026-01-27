@@ -5,400 +5,930 @@
 [![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD-D24939)]()
 [![MLflow](https://img.shields.io/badge/MLflow-Tracking-0194E2)]()
 [![Evidently](https://img.shields.io/badge/Evidently-Monitoring-FF6B6B)]()
+[![Python](https://img.shields.io/badge/Python-3.9+-3776AB)]()
 
-Système complet de prédiction du churn bancaire avec pipeline MLOps automatisé : tracking ML, monitoring de drift, CI/CD, et déploiement containerisé.
-
----
-
-## 🎯 Objectif du Projet
-
-Prédire le risque de départ des clients bancaires en utilisant un modèle de Machine Learning performant (ROC-AUC: **0.993**), avec un pipeline MLOps complet pour assurer la **qualité**, la **traçabilité**, et le **monitoring** du modèle en production.
+> **Master 2 Data Science - Université Claude Bernard Lyon 1**  
+> Projet de groupe démontrant un pipeline MLOps complet pour la prédiction du churn bancaire
 
 ---
 
-## 🏗️ Architecture MLOps Complète
+## 📋 Table des Matières
+
+- [Vue d'ensemble](#-vue-densemble)
+- [Architecture MLOps](#-architecture-mlops)
+- [Workflow Automatisé](#-workflow-automatisé)
+- [Performances du Modèle](#-performances-du-modèle)
+- [Installation & Démarrage](#-installation--démarrage)
+- [Structure du Projet](#-structure-du-projet)
+- [Notebooks](#-notebooks)
+- [Technologies Utilisées](#-technologies-utilisées)
+- [Monitoring et Drift Detection](#-monitoring-et-drift-detection)
+- [Perspectives Futures](#-perspectives-futures)
+- [Équipe](#-équipe)
+
+---
+
+## 🎯 Vue d'ensemble
+
+Ce projet implémente un **système complet de prédiction du churn bancaire** avec un pipeline MLOps end-to-end. Il démontre l'application des meilleures pratiques MLOps incluant:
+
+- **Expérimentation ML** avec tracking via MLflow sur DagsHub
+- **Pipeline CI/CD automatisé** avec Jenkins et GitHub Webhooks
+- **Monitoring de drift** avec Evidently AI
+- **Déploiement containerisé** avec Docker et Docker Compose
+- **API REST** avec FastAPI et interface utilisateur Streamlit
+
+### 🎓 Contexte Académique
+
+**Programme:** Master 2 Data Science  
+**Institution:** Université Claude Bernard Lyon 1  
+**Type:** Projet de groupe  
+**Objectif pédagogique:** Maîtriser l'ensemble du cycle de vie MLOps, de l'expérimentation à la production
+
+### 🏆 Résultats Clés
+
+- **ROC-AUC Score:** 0.993 (modèle LightGBM optimisé)
+- **F1-Score:** 0.919
+- **Pipeline 100% automatisé** depuis le push Git jusqu'au déploiement
+- **Monitoring en temps réel** avec détection automatique de drift
+
+---
+
+## 🏗️ Architecture MLOps
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    DÉVELOPPEMENT & TRACKING                      │
+│                  📓 DÉVELOPPEMENT & TRACKING                     │
 ├─────────────────────────────────────────────────────────────────┤
-│  Notebooks  →  MLflow (DagsHub)  →  Model Registry             │
-│  (Exploration)   (Tracking)           (Versioning)              │
+│  Notebooks (3)  →  MLflow (DagsHub)  →  Model Registry         │
+│  • preprocessing.ipynb                                           │
+│  • modeling.ipynb     (Expérimentation)                         │
+│  • mlflow_tracking.ipynb                                         │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│                    VERSIONING & TRIGGER                          │
+│                    🔄 VERSIONING & TRIGGER                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  GitHub Repository  →  Webhook  →  Jenkins Pipeline            │
-│  (Code + Data)         (Auto)       (CI/CD)                     │
+│  (Code + Data)         (ngrok)      (Jenkinsfile)               │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│                    MONITORING & VALIDATION                       │
+│                    📊 MONITORING & VALIDATION                    │
 ├─────────────────────────────────────────────────────────────────┤
-│  Evidently AI  →  Drift Detection  →  Auto-Retraining (Future) │
-│  (Data Quality)   (Alerts)             (If Drift > Threshold)   │
+│  Evidently AI  →  Drift Detection  →  Reports (HTML/JSON)      │
+│  (Data Quality)   (KS Test)            (Port 9000)              │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│                    BUILD & DEPLOYMENT                            │
+│                    🐳 BUILD & DEPLOYMENT                         │
 ├─────────────────────────────────────────────────────────────────┤
-│  Docker Images  →  Docker Hub  →  docker-compose Deploy        │
-│  (Backend+Frontend) (Registry)     (Production)                 │
+│  Docker Build  →  Docker Hub  →  docker-compose Deploy         │
+│  (Multi-stage)    (Registry)      (3 services)                  │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│                    PRODUCTION SERVICES                           │
+│                    🚀 PRODUCTION SERVICES                        │
 ├─────────────────────────────────────────────────────────────────┤
-│  Backend API (FastAPI)  |  Frontend (Streamlit)  |  Monitoring  │
-│  :8000                  |  :8501                 |  :9000        │
+│  Backend (FastAPI)  |  Frontend (Streamlit)  |  Monitoring     │
+│  :8000              |  :8501                 |  :9000           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔄 Workflow MLOps Automatisé
+## 🔄 Workflow Automatisé
 
-### **1️⃣ Phase Développement : ML Experimentation & Tracking**
-```python
-# notebooks/ - Expérimentation des modèles
-├── 01_data_exploration.ipynb      # EDA + Feature Engineering
-├── 02_model_training.ipynb        # Training avec MLflow tracking
-├── 03_model_evaluation.ipynb      # Comparaison des modèles
-└── model_registry/                # Meilleur modèle versionné
-    └── best_model_final.pkl       # LightGBM (ROC-AUC: 0.993)
-```
+### 1️⃣ Phase Développement
 
-**MLflow sur DagsHub** :
-- 📊 Track de **20+ expérimentations** (hyperparamètres, métriques, artefacts)
-- 🏆 Sélection automatique du meilleur modèle (ROC-AUC: 0.9931)
-- 📦 Registry centralisé pour versioning des modèles
-- 🔗 URL DagsHub : https://dagshub.com/YessineK/Mlops_Project
+#### **Notebooks de Développement**
+
+Le projet est structuré en **3 notebooks Jupyter** documentant le cycle complet:
+
+1. **`preprocessing.ipynb`** - Préparation des données
+   - Nettoyage et transformation
+   - Feature engineering (5 nouvelles features)
+   - Gestion des valeurs manquantes
+   - Encoding des variables catégorielles
+   - Stratification du dataset
+
+2. **`modeling.ipynb`** - Entraînement des modèles
+   - Modèles baseline (6 algorithmes)
+   - Fine-tuning avec RandomizedSearchCV
+   - Ensemble learning (Stacking & Voting)
+   - Évaluation comparative multi-métriques
+
+3. **`mlflow_tracking.ipynb`** - Tracking et Registry
+   - Logging de 20+ expérimentations
+   - Comparaison des performances
+   - Sélection du meilleur modèle
+   - Enregistrement dans Model Registry
+
+#### **MLflow sur DagsHub**
+
+- 📊 **Tracking centralisé:** https://dagshub.com/karrayyessine1/MLOps_Project/experiments
+- 🏆 **Meilleur modèle:** LightGBM (ROC-AUC: 0.9931)
+- 📦 **Model Registry:** Versioning et staging des modèles
+- 🔗 **Collaboration:** Partage des expérimentations entre membres de l'équipe
 
 ---
 
-### **2️⃣ Phase CI/CD : Automatisation avec Jenkins**
+### 2️⃣ Phase CI/CD - Jenkins
 
-#### **Déclenchement Automatique via Webhook**
-```bash
-# Workflow automatique
-Nouvelle data ajoutée → Git push → GitHub Webhook → Jenkins Pipeline
-```
+#### **Configuration du Pipeline**
 
-**Configuration Webhook GitHub** :
-- **Payload URL** : `https://YOUR_NGROK_URL/github-webhook/`
-- **Events** : Push events
-- **Résultat** : Jenkins démarre automatiquement à chaque push
+**Jenkins URL:** https://3fc290848417.ngrok-free.app → http://localhost:8080
 
-#### **Pipeline Jenkins (Jenkinsfile)**
+Le pipeline Jenkins s'exécute automatiquement à chaque push Git via webhook:
+
 ```groovy
 pipeline {
+    agent any
+    
     stages {
-        stage('📥 Clone Repository')       # Clone du code depuis GitHub
-        stage('🐍 Setup Python')           # Installation dépendances
-        stage('📊 Register Best Model')    # Copie du modèle depuis registry
-        stage('📊 Data Drift Monitoring')  # Evidently : détection drift
-        stage('📄 Archive Reports')        # Sauvegarde rapports HTML/JSON
-        stage('📊 Publish Reports')        # Docker container (port 9000)
-        stage('🐳 Build Docker Images')    # Build Backend + Frontend
-        stage('🚀 Push to Docker Hub')     # Push images vers registry
-        stage('🚀 Deploy Application')     # docker-compose up
-        stage('🏥 Health Check')           # Validation déploiement
+        stage('📥 Clone Repository') {
+            // Clone depuis GitHub
+        }
+        
+        stage('🐍 Setup Python Environment') {
+            // Installation des dépendances
+        }
+        
+        stage('📊 Register Best Model') {
+            // Copie du modèle depuis model_registry/
+        }
+        
+        stage('📊 Data Drift Monitoring') {
+            // Evidently: détection de drift
+        }
+        
+        stage('📄 Archive Reports') {
+            // Sauvegarde rapports HTML/JSON
+        }
+        
+        stage('📊 Publish Reports') {
+            // Container nginx pour visualisation
+        }
+        
+        stage('🐳 Build Docker Images') {
+            // Build Backend + Frontend
+        }
+        
+        stage('🚀 Push to Docker Hub') {
+            // Push vers yessinekarray/*
+        }
+        
+        stage('🚀 Deploy Application') {
+            // docker-compose up
+        }
+        
+        stage('🏥 Health Check') {
+            // Validation des services
+        }
     }
 }
 ```
 
-**Jenkins exécute automatiquement** :
-1. ✅ Validation de la structure du projet
-2. ✅ Enregistrement du modèle depuis `model_registry/`
-3. ✅ Monitoring avec Evidently (drift + performance)
-4. ✅ Build des images Docker (Backend FastAPI + Frontend Streamlit)
-5. ✅ Push vers Docker Hub (`yessinekarray/churn-backend`, `churn-frontend`)
-6. ✅ Déploiement avec `docker-compose`
-7. ✅ Health checks des services
+#### **Déclenchement Automatique**
+
+**Configuration GitHub Webhook:**
+- **URL:** `https://3fc290848417.ngrok-free.app/github-webhook/`
+- **Events:** Push events
+- **Content-Type:** application/json
+
+**Flux:**
+```
+Nouveau push → GitHub Webhook → ngrok → Jenkins → Pipeline automatique
+```
 
 ---
 
-### **3️⃣ Phase Monitoring : Evidently AI pour Data Drift**
+### 3️⃣ Phase Monitoring - Evidently AI
+
+#### **Détection Automatique de Drift**
+
+Le système de monitoring génère automatiquement:
+
+- 📊 **Data Drift Report** - Distribution des features (référence vs production)
+- 📈 **Performance Report** - Métriques du modèle en temps réel
+- ⚠️ **Alerts** - Notifications si drift détecté
+- 🌐 **Dashboard** - Rapports HTML accessibles sur http://localhost:9000
+
+#### **Tests Automatisés**
+
 ```python
-# monitoring/ - Détection automatique de drift
-├── prepare_data.py              # Préparation des datasets
-├── score_data.py                # Scoring des nouvelles données
-├── run_monitoring.py            # Génération rapports Evidently
-└── data/
-    ├── churn2.csv               # Reference dataset (baseline)
-    └── prod_batch_*.csv         # Production batches (détection auto)
+# Le monitoring détecte automatiquement le fichier le plus récent
+latest_file = get_latest_prod_file("monitoring/data/")
+
+# Tests exécutés:
+✓ Data Stability Test
+✓ Column Drift Test (Kolmogorov-Smirnov)
+✓ Dataset Drift Test
+⚠️ Alert si drift > seuil configuré
 ```
 
-**Evidently génère automatiquement** :
-- 📊 **Data Drift Report** : Distribution des features (reference vs current)
-- 📈 **Performance Report** : Métriques du modèle en production
-- ⚠️ **Alerts** : Si drift détecté → Jenkins notifie (logs + artifacts)
-- 🌐 **Dashboard** : Rapports HTML accessibles sur `http://localhost:9000`
+#### **Fichiers Surveillés**
 
-**Détection Automatique du Dernier Fichier** :
-```python
-# prepare_data.py détecte automatiquement le fichier le plus récent
-def get_latest_prod_file(data_dir):
-    prod_files = glob.glob(os.path.join(data_dir, "prod_batch_*.csv"))
-    latest = max(prod_files, key=os.path.getmtime)  # Tri par date
-    return latest
 ```
-
-**Tests de Drift** :
-- ✅ Data Stability Test
-- ✅ Column Drift Test (Kolmogorov-Smirnov)
-- ✅ Dataset Drift Test
-- ⚠️ Si **drift > seuil** → Future : Auto-retraining
+monitoring/data/
+├── churn2.csv              # Dataset de référence (baseline)
+└── prod_batch_*.csv        # Batches de production (détection auto)
+```
 
 ---
 
-### **4️⃣ Phase Déploiement : Containerisation Docker**
+### 4️⃣ Phase Déploiement - Docker
 
 #### **Architecture Multi-Container**
+
 ```yaml
-# docker-compose.yml
 services:
-  backend:                          # API FastAPI
+  backend:
     image: yessinekarray/churn-backend:latest
     ports: ["8000:8000"]
-    volumes: ["./models:/app/processors/models"]  # Modèle externe (1 GB)
+    volumes: ["./models:/app/processors/models"]
     
-  frontend:                         # Interface Streamlit
+  frontend:
     image: yessinekarray/churn-frontend:latest
     ports: ["8501:8501"]
     depends_on: [backend]
     
-  monitoring:                       # Rapports Evidently
+  monitoring:
     image: monitoring-reports:latest
     ports: ["9000:80"]
 ```
 
-**Optimisation : Modèle Externe (Docker Volume)** :
-- ❌ **Problème** : Modèle de 1 GB → Image Docker trop lourde
-- ✅ **Solution** : Modèle stocké sur host, monté via volume
-- 🚀 **Résultat** : Images Docker légères (~100 MB), push/pull rapides
+#### **Optimisation - Modèle Externe**
+
+**Problème:** Modèle de 1 GB → Image Docker trop lourde  
+**Solution:** Modèle stocké sur host, monté via Docker volume  
+**Résultat:** Images Docker ~100 MB, push/pull rapides
 
 ---
 
 ## 📊 Performances du Modèle
 
-### **Meilleur Modèle : LightGBM (Hyperparameter Tuning)**
+### **Meilleur Modèle: LightGBM (Optimisé)**
 
-| Métrique      | Score  | Détails                                    |
-|---------------|--------|--------------------------------------------|
-| **ROC-AUC**   | 0.9931 | Excellente discrimination des classes      |
-| **F1-Score**  | 0.9192 | Bon équilibre Precision/Recall             |
-| **Precision** | 0.9023 | 90% des prédictions "Churn" sont correctes |
-| **Recall**    | 0.9372 | 94% des vrais "Churn" détectés             |
+| Métrique      | Score  | Interprétation                                  |
+|---------------|--------|-------------------------------------------------|
+| **ROC-AUC**   | 0.9931 | Excellente discrimination des classes           |
+| **F1-Score**  | 0.9192 | Équilibre optimal Precision/Recall              |
+| **Precision** | 0.9023 | 90% des prédictions "Churn" sont correctes      |
+| **Recall**    | 0.9372 | 94% des vrais churners sont détectés            |
+| **Accuracy**  | 0.9650 | Performance globale très élevée                 |
 
-**Modèles Comparés** (trackés sur MLflow) :
-- Logistic Regression (baseline)
+### **Comparaison des Modèles**
+
+Tous les modèles ont été trackés dans MLflow avec métriques complètes:
+
+**Baseline Models:**
+- Logistic Regression
 - Random Forest
+- Gradient Boosting
 - XGBoost
-- **LightGBM** ⭐ (meilleur)
+- LightGBM ⭐
+- CatBoost
+
+**Fine-Tuned Models:**
+- Optimisation via RandomizedSearchCV (40 itérations × 5-fold CV)
+- Amélioration moyenne: +2.5% ROC-AUC
+
+**Ensemble Models:**
+- Stacking Classifier (LogReg meta-learner)
+- Voting Classifier (Soft voting)
 
 ---
 
 ## 🚀 Installation & Démarrage
 
 ### **Prérequis**
-- Docker & Docker Compose
+
+- Docker & Docker Compose (≥20.10)
 - Git
+- Python 3.9+ (pour développement local)
 - Jenkins (pour CI/CD)
 - ngrok (pour webhook GitHub)
 
-### **1. Cloner le Repository**
+### **Option 1: Déploiement Rapide (Docker)**
+
 ```bash
+# 1. Cloner le repository
 git clone https://github.com/YessineK/Mlops_Project.git
 cd Mlops_Project
-```
 
-### **2. Configuration Jenkins**
-
-**Installer Jenkins** :
-```bash
-docker run -d -p 8080:8080 -p 50000:50000 \
-  -v jenkins_home:/var/jenkins_home \
-  --name jenkins jenkins/jenkins:lts
-```
-
-**Configurer le Pipeline** :
-1. Créer un projet Pipeline dans Jenkins
-2. SCM : Git → `https://github.com/YessineK/Mlops_Project.git`
-3. Build Triggers : ✅ "GitHub hook trigger for GITScm polling"
-4. Credentials Docker Hub : `docker-hub-credentials`
-
-**Exposer Jenkins avec ngrok** :
-```bash
-ngrok http 8080
-# Copier l'URL : https://YOUR_ID.ngrok-free.app
-```
-
-**Configurer Webhook GitHub** :
-- Repository Settings → Webhooks → Add webhook
-- Payload URL : `https://YOUR_ID.ngrok-free.app/github-webhook/`
-- Content type : `application/json`
-- Events : ✅ Just the push event
-
-### **3. Déploiement Local (Sans Jenkins)**
-```bash
-# Préparer le modèle
+# 2. Préparer le modèle (copie depuis registry)
 mkdir -p models
 cp notebooks/model_registry/best_model_final.pkl models/
 
-# Lancer l'application
+# 3. Lancer l'application complète
 docker-compose up --build
 ```
 
-**Services Accessibles** :
-- 🎨 **Frontend** : http://localhost:8501 (Interface utilisateur)
-- 🔌 **Backend API** : http://localhost:8000/docs (Swagger UI)
-- 📊 **Monitoring** : http://localhost:9000 (Rapports Evidently)
+**Services disponibles:**
+- 🎨 **Frontend:** http://localhost:8501
+- 🔌 **API Backend:** http://localhost:8000/docs (Swagger UI)
+- 📊 **Monitoring:** http://localhost:9000
+
+### **Option 2: Setup Complet avec CI/CD**
+
+#### **1. Installation Jenkins**
+
+```bash
+docker run -d -p 8080:8080 -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --name jenkins jenkins/jenkins:lts
+
+# Récupérer le mot de passe initial
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+#### **2. Configuration Jenkins**
+
+1. Accéder à http://localhost:8080
+2. Installer les plugins recommandés + **Docker Pipeline**
+3. Créer un nouveau projet **Pipeline**
+4. Configuration:
+   - **SCM:** Git
+   - **Repository URL:** https://github.com/YessineK/Mlops_Project.git
+   - **Branch:** main
+   - **Build Triggers:** ✅ GitHub hook trigger for GITScm polling
+5. Ajouter les credentials Docker Hub:
+   - ID: `docker-hub-credentials`
+   - Type: Username with password
+
+#### **3. Exposition Jenkins avec ngrok**
+
+```bash
+# Installer ngrok
+brew install ngrok  # macOS
+# ou télécharger depuis https://ngrok.com/download
+
+# Exposer Jenkins
+ngrok http 8080
+
+# Note: L'URL générée (ex: https://3fc290848417.ngrok-free.app)
+```
+
+#### **4. Configuration GitHub Webhook**
+
+1. Aller dans **Settings** → **Webhooks** → **Add webhook**
+2. Configuration:
+   - **Payload URL:** `https://YOUR_NGROK_URL/github-webhook/`
+   - **Content type:** application/json
+   - **Events:** ✅ Just the push event
+   - **Active:** ✅
+
+#### **5. Test du Pipeline**
+
+```bash
+# Faire un commit test
+echo "test" >> README.md
+git add .
+git commit -m "test: trigger Jenkins pipeline"
+git push origin main
+
+# Jenkins devrait démarrer automatiquement
+# Vérifier: https://YOUR_NGROK_URL
+```
 
 ---
 
 ## 📁 Structure du Projet
+
 ```
 Mlops_Project/
 │
-├── backend/src/                    # API FastAPI
-│   ├── main.py                     # Endpoints API (/predict, /health)
-│   ├── processors/
-│   │   ├── models/                 # Modèles ML (via volume)
-│   │   └── preprocessor.pkl        # Pipeline preprocessing
+├── 📓 notebooks/                       # Développement ML
+│   ├── preprocessing.ipynb             # Étape 1: Préparation données
+│   ├── modeling.ipynb                  # Étape 2: Entraînement modèles
+│   ├── mlflow_tracking.ipynb           # Étape 3: Tracking & Registry
+│   ├── model_registry/                 # Meilleurs modèles sauvegardés
+│   │   ├── best_model_final.pkl        # LightGBM (1 GB)
+│   │   └── metadata.json               # Métadonnées du modèle
+│   └── processors/                     # Preprocessors versionnés
+│       ├── preprocessor.pkl
+│       ├── feature_names.pkl
+│       └── preprocessed_data.pkl
+│
+├── 🐍 backend/                         # API FastAPI
+│   ├── src/
+│   │   ├── main.py                     # Endpoints REST
+│   │   └── processors/
+│   │       ├── models/                 # Modèles (via volume)
+│   │       └── preprocessor.pkl
 │   └── Dockerfile
 │
-├── frontend/                       # Interface Streamlit
-│   ├── app.py                      # UI utilisateur
+├── 🎨 frontend/                        # Interface Streamlit
+│   ├── app.py                          # UI utilisateur
 │   └── Dockerfile
 │
-├── notebooks/                      # ML Experimentation
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_model_training.ipynb     # MLflow tracking
-│   ├── 03_model_evaluation.ipynb
-│   ├── model_registry/
-│   │   └── best_model_final.pkl    # Meilleur modèle (1 GB)
-│   └── processors/                 # Preprocessors versionnés
-│
-├── monitoring/                     # Evidently AI Monitoring
-│   ├── prepare_data.py             # Détection auto dernier fichier
-│   ├── score_data.py               # Scoring production
-│   ├── run_monitoring.py           # Génération rapports
-│   ├── Dockerfile                  # Container monitoring (nginx)
+├── 📊 monitoring/                      # Evidently AI
+│   ├── prepare_data.py                 # Détection auto dernier fichier
+│   ├── score_data.py                   # Scoring production
+│   ├── run_monitoring.py               # Génération rapports
+│   ├── Dockerfile                      # Container nginx
 │   └── data/
-│       ├── churn2.csv              # Reference dataset
-│       └── prod_batch_*.csv        # Production batches
+│       ├── churn2.csv                  # Reference dataset
+│       └── prod_batch_*.csv            # Production batches
 │
-├── Jenkins/
-│   └── register_best_model.py      # Copie modèle → backend/
+├── ⚙️ Jenkins/
+│   └── register_best_model.py          # Script copie modèle → backend
 │
-├── models/                         # Modèles pour déploiement (host)
-│   └── best_model_final.pkl        # Monté via Docker volume
+├── 📦 models/                          # Modèles pour déploiement (host)
+│   └── best_model_final.pkl            # Monté via Docker volume
 │
-├── docker-compose.yml              # Orchestration multi-container
-├── Jenkinsfile                     # Pipeline CI/CD automatisé
-├── .gitignore                      # Ignore *.pkl, *.csv (sauf monitoring)
-└── README.md
+├── 🐳 docker-compose.yml               # Orchestration services
+├── 📋 Jenkinsfile                      # Pipeline CI/CD
+├── 📄 README.md                        # Ce fichier
+├── 📄 requirements.txt                 # Dépendances Python
+└── .gitignore
 ```
+
+---
+
+## 📓 Notebooks
+
+### **1. preprocessing.ipynb**
+
+**Objectif:** Préparation et nettoyage des données
+
+**Étapes principales:**
+- Import et exploration des données (`churn2.csv`)
+- Nettoyage:
+  - Suppression colonnes vides
+  - Conversion types (categorical encoding)
+  - Gestion valeurs manquantes ("Unknown" → imputation)
+- Feature Engineering:
+  - `tenure_per_age`
+  - `utilisation_per_age`
+  - `credit_lim_per_age`
+  - `total_trans_amt_per_credit_lim`
+  - `total_trans_ct_per_credit_lim`
+- Preprocessing pipeline:
+  - StandardScaler pour variables numériques
+  - OneHotEncoder pour variables catégorielles
+- Sauvegarde artifacts:
+  - `preprocessor.pkl`
+  - `feature_names.pkl`
+  - `preprocessed_data.pkl`
+
+**Sorties:**
+- Dataset preprocessé prêt pour modeling
+- 28 features finales (23 originales + 5 engineerées)
+- Train/Test split stratifié (80/20)
+
+---
+
+### **2. modeling.ipynb**
+
+**Objectif:** Entraînement, optimisation et sélection du meilleur modèle
+
+**Étapes principales:**
+
+1. **Baseline Models** (6 modèles):
+   ```python
+   - Logistic Regression
+   - Random Forest
+   - Gradient Boosting
+   - XGBoost
+   - LightGBM
+   - CatBoost
+   ```
+
+2. **Fine-Tuning** (RandomizedSearchCV):
+   - 40 itérations × 5-fold CV
+   - Optimisation sur PR-AUC (métrique clé churn)
+   - Recherche d'hyperparamètres:
+     - Learning rate: [0.01, 0.02, 0.03, 0.05]
+     - N_estimators: [400, 600, 800, 1000]
+     - Max_depth, min_samples, etc.
+
+3. **Ensemble Learning**:
+   - Stacking Classifier (LogReg meta-learner)
+   - Voting Classifier (Soft voting)
+
+4. **Évaluation Multi-Métriques**:
+   - Accuracy, Precision, Recall
+   - F1-Score, ROC-AUC, PR-AUC
+   - Courbes ROC et Precision-Recall
+   - Matrices de confusion
+
+5. **Sauvegarde du Meilleur Modèle**:
+   - Score composite pondéré:
+     - ROC-AUC: 35%
+     - F1-Score: 30%
+     - Recall: 25%
+     - Precision: 10%
+
+**Sorties:**
+- `best_model_final.pkl` (LightGBM optimisé)
+- `model_comparison_final.csv`
+- `model_improvements.csv`
+- Graphiques de comparaison
+
+---
+
+### **3. mlflow_tracking.ipynb**
+
+**Objectif:** Tracking MLflow et gestion du Model Registry
+
+**Étapes principales:**
+
+1. **Configuration MLflow + DagsHub**:
+   ```python
+   MLFLOW_TRACKING_URI = "https://dagshub.com/karrayyessine1/MLOps_Project.mlflow"
+   EXPERIMENT_NAME = "churn_prediction"
+   ```
+
+2. **Logging des Modèles**:
+   - Production model (1 run)
+   - Tuned models (6 runs)
+   - Ensemble models (2 runs)
+   - **Total: 9 runs trackées**
+
+3. **Métadonnées Loggées**:
+   - Paramètres (hyperparamètres, dataset)
+   - Métriques (accuracy, F1, ROC-AUC, etc.)
+   - Artifacts (modèles .pkl)
+   - Durée d'entraînement
+
+4. **Model Registry Local**:
+   ```
+   model_registry/
+   ├── Best_Churn_LightGBM/
+   │   ├── 1.0.0/
+   │   │   ├── model.pkl
+   │   │   └── metadata.json
+   │   └── production.pkl
+   ```
+
+5. **Lecture et Comparaison**:
+   - Pandas DataFrame depuis MLflow
+   - Tri par ROC-AUC
+   - Sélection du meilleur modèle
+
+**Sorties:**
+- Dashboard MLflow complet sur DagsHub
+- Model Registry versionné
+- Meilleur modèle prêt pour déploiement
+
+**Accès Dashboard:**
+- https://dagshub.com/karrayyessine1/MLOps_Project/experiments
 
 ---
 
 ## 🔧 Technologies Utilisées
 
 ### **Machine Learning**
-- **scikit-learn** : Preprocessing, baseline models
-- **LightGBM** : Gradient Boosting (best model)
-- **imbalanced-learn** : SMOTE (class balancing)
-- **pandas, numpy** : Data manipulation
+
+| Technologie | Usage | Version |
+|-------------|-------|---------|
+| **scikit-learn** | Preprocessing, baseline models | 1.3+ |
+| **LightGBM** | Meilleur modèle (Gradient Boosting) | 4.0+ |
+| **XGBoost** | Alternative Gradient Boosting | 2.0+ |
+| **CatBoost** | Handling de features catégorielles | 1.2+ |
+| **imbalanced-learn** | SMOTE (gestion déséquilibre) | 0.11+ |
+| **pandas** | Manipulation de données | 2.0+ |
+| **numpy** | Calculs numériques | 1.24+ |
 
 ### **MLOps & Tracking**
-- **MLflow** : Experiment tracking, model registry
-- **DagsHub** : Remote MLflow server (collaboration)
-- **Evidently AI** : Data drift detection, model monitoring
+
+| Technologie | Usage | Version |
+|-------------|-------|---------|
+| **MLflow** | Experiment tracking, model registry | 2.8+ |
+| **DagsHub** | Remote MLflow server (collaboration) | - |
+| **Evidently AI** | Data drift detection, monitoring | 0.4+ |
 
 ### **CI/CD & Deployment**
-- **Jenkins** : Pipeline automation (build, test, deploy)
-- **Docker** : Containerization (Backend, Frontend, Monitoring)
-- **Docker Hub** : Image registry (`yessinekarray/*`)
-- **GitHub Webhooks** : Auto-trigger Jenkins on push
-- **ngrok** : Expose Jenkins for webhook
+
+| Technologie | Usage | Version |
+|-------------|-------|---------|
+| **Jenkins** | Pipeline automation (CI/CD) | 2.426+ |
+| **Docker** | Containerization | 24.0+ |
+| **Docker Compose** | Multi-container orchestration | 2.23+ |
+| **Docker Hub** | Image registry | - |
+| **GitHub Webhooks** | Auto-trigger Jenkins on push | - |
+| **ngrok** | Expose Jenkins for webhook | 3.0+ |
 
 ### **Backend & Frontend**
-- **FastAPI** : RESTful API (Python, Pydantic)
-- **Streamlit** : Interactive web UI
-- **uvicorn** : ASGI server
+
+| Technologie | Usage | Version |
+|-------------|-------|---------|
+| **FastAPI** | RESTful API (Python) | 0.104+ |
+| **Streamlit** | Interactive web UI | 1.28+ |
+| **uvicorn** | ASGI server | 0.24+ |
+| **Pydantic** | Data validation | 2.5+ |
+
+### **Monitoring & Reporting**
+
+| Technologie | Usage | Version |
+|-------------|-------|---------|
+| **nginx** | Servir rapports HTML | 1.25+ |
+| **matplotlib** | Visualisations statiques | 3.7+ |
+| **seaborn** | Visualisations statistiques | 0.12+ |
 
 ---
 
-## 🔮 Perspectives Futures (Roadmap)
+## 📊 Monitoring et Drift Detection
 
-### **Phase 1 : Auto-Retraining** 🤖
+### **Architecture de Monitoring**
+
+```python
+monitoring/
+├── prepare_data.py          # Détection auto dernier batch
+├── score_data.py            # Scoring avec modèle de production
+├── run_monitoring.py        # Génération rapports Evidently
+└── data/
+    ├── churn2.csv           # Reference dataset (baseline)
+    └── prod_batch_*.csv     # Production batches
 ```
-Si drift détecté → Retraining automatique
+
+### **Rapports Générés**
+
+#### **1. Data Drift Report**
+- Comparaison distributions (reference vs current)
+- Tests statistiques par feature (Kolmogorov-Smirnov)
+- Visualisation des drifts détectés
+
+#### **2. Performance Report**
+- Métriques du modèle en production
+- Comparaison avec baseline
+- Dégradation de performance
+
+#### **3. Test Results (JSON)**
+```json
+{
+  "data_stability": "PASS",
+  "column_drift": "WARNING",
+  "dataset_drift": "FAIL",
+  "drifted_features": ["total_trans_ct", "avg_utilization_ratio"]
+}
+```
+
+### **Accès aux Rapports**
+
+**Dashboard:** http://localhost:9000
+
+Contenu:
+- `monitoring_report.html` - Visualisation interactive du drift
+- `performance_report.html` - Métriques de performance
+- `*.json` - Résultats des tests automatisés
+
+### **Alerting (Future)**
+
+Si drift détecté (seuil > 3 features):
+1. 📧 Email aux data scientists
+2. 📱 Notification Slack
+3. 🔄 Déclenchement auto-retraining (roadmap)
+
+---
+
+## 🔮 Perspectives Futures
+
+### **Phase 1: Auto-Retraining** 🤖
+
+**Workflow proposé:**
+```
+Drift détecté (> seuil)
     ↓
-Combine old + new data
+Combine old data + new batch
     ↓
 Train nouveau modèle
     ↓
-Validation (compare performances)
+Validation (compare performances vs modèle actuel)
     ↓
-Si meilleur → Deploy | Sinon → Alerte
+Si meilleur → Deploy automatique
+Sinon       → Alerte équipe
 ```
 
-**Implémentation** :
-- Jenkinsfile : Stage "Auto-Retraining si Drift"
-- Scripts : `retrain_with_new_data.py`, `validate_new_model.py`
-- Seuil drift : 3+ colonnes → déclenche retraining
-
-### **Phase 2 : Model Storage Scalable** ☁️
-- **MinIO** (S3-compatible, self-hosted) pour stocker modèles
-- Backend télécharge modèle au démarrage (alternative au volume)
-- Versioning des modèles avec tags (v1.0, v1.1, etc.)
-
-### **Phase 3 : Kubernetes Deployment** ⚓
-- Conversion docker-compose → Kubernetes manifests
-- Auto-scaling backend based on load
-- Rolling updates sans downtime
-
-### **Phase 4 : A/B Testing** 🧪
-- Déployer 2 versions du modèle en parallèle
-- Router 50% traffic → Model A, 50% → Model B
-- Comparer performances en production réelle
-
-### **Phase 5 : Real-Time Monitoring Dashboard** 📊
-- Grafana + Prometheus pour métriques temps réel
-- Alertes Slack/Email si drift ou dégradation performance
-- Historique des drifts et retrainings
+**Implémentation:**
+- Nouveau stage Jenkins: "Auto-Retraining if Drift"
+- Scripts: `retrain_with_new_data.py`, `validate_new_model.py`
+- Seuil configurable: 3+ colonnes en drift
 
 ---
 
-## 📚 Documentation Complémentaire
+### **Phase 2: Model Storage Scalable** ☁️
 
-### **APIs**
-- **Backend Swagger** : http://localhost:8000/docs
-  - `POST /predict` : Prédiction churn (JSON input)
-  - `GET /health` : Health check API
+**Problème actuel:** Modèle 1GB monté via volume Docker
+
+**Solution proposée:**
+- **MinIO** (S3-compatible, self-hosted)
+- Backend télécharge modèle au démarrage
+- Versioning avec tags (v1.0, v1.1, etc.)
+- Rollback rapide en cas de problème
+
+**Architecture:**
+```
+MinIO (S3)
+├── models/
+│   ├── churn_v1.0.pkl
+│   ├── churn_v1.1.pkl
+│   └── churn_latest.pkl
+```
+
+---
+
+### **Phase 3: Kubernetes Deployment** ⚓
+
+**Migration Docker → Kubernetes:**
+
+```yaml
+# Exemple de manifests
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: churn-backend
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: backend
+        image: yessinekarray/churn-backend:latest
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+```
+
+**Avantages:**
+- Auto-scaling basé sur charge CPU/mémoire
+- Rolling updates sans downtime
+- Health checks automatiques
+- Load balancing natif
+
+---
+
+### **Phase 4: A/B Testing** 🧪
+
+**Objectif:** Comparer 2 versions du modèle en production
+
+**Implémentation:**
+```python
+# Traffic routing
+if user_id % 2 == 0:
+    model = load_model("v1.0")  # 50% traffic
+else:
+    model = load_model("v1.1")  # 50% traffic
+
+# Tracking des performances
+log_prediction(user_id, model_version, prediction, actual)
+```
+
+**Métriques comparées:**
+- ROC-AUC en production
+- Latence moyenne
+- Taux de faux positifs/négatifs
+- Feedback utilisateur
+
+---
+
+### **Phase 5: Real-Time Monitoring Dashboard** 📊
+
+**Stack proposé:**
+- **Grafana:** Visualisation temps réel
+- **Prometheus:** Collecte métriques
+- **Alerting:** Slack/Email
+
+**Métriques trackées:**
+```
+- Nombre de prédictions/min
+- Latence P50/P95/P99
+- Taux de drift par feature
+- Distribution des prédictions
+- Taux d'erreur API
+- Utilisation CPU/Mémoire
+```
+
+**Alertes configurées:**
+- Drift détecté sur >3 features
+- Latence >500ms
+- Taux d'erreur >1%
+- Dégradation ROC-AUC >5%
+
+---
+
+## 📚 Documentation & APIs
+
+### **API Backend (FastAPI)**
+
+**Swagger UI:** http://localhost:8000/docs
+
+#### **Endpoints disponibles:**
+
+**1. Health Check**
+```http
+GET /health
+
+Response 200:
+{
+  "status": "healthy",
+  "model_loaded": true,
+  "timestamp": "2026-01-27T10:30:00Z"
+}
+```
+
+**2. Prédiction Churn**
+```http
+POST /predict
+Content-Type: application/json
+
+Request Body:
+{
+  "customer_age": 45,
+  "gender": "M",
+  "dependent_count": 2,
+  "education_level": "Graduate",
+  "marital_status": "Married",
+  "income_category": "$60K - $80K",
+  "card_category": "Blue",
+  "months_on_book": 39,
+  "total_relationship_count": 5,
+  "months_inactive_12_mon": 1,
+  "contacts_count_12_mon": 3,
+  "credit_limit": 12691.51,
+  "total_revolving_bal": 777,
+  "avg_open_to_buy": 11914.51,
+  "total_amt_chng_q4_q1": 1.335,
+  "total_trans_amt": 1144,
+  "total_trans_ct": 42,
+  "total_ct_chng_q4_q1": 1.625,
+  "avg_utilization_ratio": 0.061
+}
+
+Response 200:
+{
+  "churn_prediction": 0,
+  "churn_probability": 0.023,
+  "risk_level": "low",
+  "features_importance": {
+    "total_trans_ct": 0.245,
+    "total_trans_amt": 0.198,
+    "avg_utilization_ratio": 0.156
+  }
+}
+```
+
+---
+
+### **Dashboard Monitoring**
+
+**URL:** http://localhost:9000
+
+**Rapports disponibles:**
+
+1. **monitoring_report.html**
+   - Data Drift Analysis
+   - Distribution plots (reference vs current)
+   - Statistical tests results
+
+2. **performance_report.html**
+   - Model performance metrics
+   - Confusion matrix
+   - ROC curve & PR curve
+
+3. **drift_tests.json**
+   - Test results détaillés
+   - Features en drift
+   - Timestamps
+
+---
 
 ### **MLflow Tracking**
-- **DagsHub UI** : https://dagshub.com/YessineK/Mlops_Project
-  - Experiments, runs, metrics, parameters
-  - Model artifacts download
 
-### **Evidently Reports**
-- **Monitoring Dashboard** : http://localhost:9000
-  - `monitoring_report.html` : Data drift visualization
-  - `performance_report.html` : Model performance metrics
-  - `*.json` : Tests results (PASS/FAIL)
+**Dashboard:** https://dagshub.com/karrayyessine1/MLOps_Project/experiments
+
+**Fonctionnalités:**
+- 📊 Compare runs (métriques, paramètres)
+- 📈 Visualisation courbes de learning
+- 📦 Download artifacts (modèles, plots)
+- 🏷️ Tagging et notes sur runs
+- 🔍 Search & filter experiments
 
 ---
 
-## 🤝 Contribution
+## 👥 Équipe
 
-Ce projet a été développé dans le cadre du **Master 2 Data Science - Université Claude Bernard Lyon 1**.
+### **Master 2 Data Science - Université Claude Bernard Lyon 1**
 
-**Auteur** : Yessine Karray  
-**LinkedIn** : [Yessine Karray](https://www.linkedin.com/in/yessine-karray/)  
-**GitHub** : [YessineK](https://github.com/YessineK)
+Ce projet a été réalisé dans le cadre du Master 2 Data Science à l'**Université Claude Bernard Lyon 1** (UCBL).
+
+#### **Contributions principales:**
+
+- **Architecture MLOps:** Design du pipeline end-to-end
+- **Développement Notebooks:** Preprocessing, Modeling, MLflow Tracking
+- **Configuration CI/CD:** Jenkins, Docker, GitHub Webhooks
+- **Monitoring:** Implémentation Evidently AI
+- **Déploiement:** Docker Compose, services production
+
+#### **Encadrement académique:**
+
+- **Programme:** Master 2 Data Science
+- **Institution:** Université Claude Bernard Lyon 1
+- **Année:** 2025-2026
 
 ---
 
@@ -410,12 +940,30 @@ MIT License - Libre d'utilisation pour l'éducation et la recherche.
 
 ## 🙏 Remerciements
 
-- **MLflow Team** pour le tracking framework
-- **Evidently AI** pour les outils de monitoring
-- **DagsHub** pour l'hébergement MLflow gratuit
-- **FastAPI & Streamlit** pour les frameworks modernes
-- **Jenkins Community** pour le CI/CD open-source
+- **MLflow Team** - Framework de tracking exceptionnel
+- **Evidently AI** - Outils de monitoring de qualité
+- **DagsHub** - Hébergement MLflow gratuit pour projets académiques
+- **FastAPI & Streamlit** - Frameworks modernes et intuitifs
+- **Jenkins Community** - CI/CD open-source robuste
+- **Université Claude Bernard Lyon 1** - Formation de qualité en Data Science
 
 ---
 
-**⭐ Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile sur GitHub !**
+## 📞 Contact
+
+Pour toute question sur ce projet:
+
+- 📧 **Email académique:** Via l'université
+- 🔗 **GitHub:** https://github.com/YessineK/Mlops_Project
+- 📊 **MLflow:** https://dagshub.com/karrayyessine1/MLOps_Project
+- 🐳 **Docker Hub:** https://hub.docker.com/u/yessinekarray
+
+---
+
+<div align="center">
+
+**⭐ Si ce projet vous a été utile, n'hésitez pas à le star! ⭐**
+
+Made with ❤️ by Master 2 Data Science Students - Université Claude Bernard Lyon 1
+
+</div>
