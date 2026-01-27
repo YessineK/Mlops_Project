@@ -110,61 +110,6 @@ pipeline {
                 sh '''
                     set +e
                     
-                    echo "🔧 Création environnement virtuel..."
-                    python3 -m venv /tmp/deepchecks_env
-                    source /tmp/deepchecks_env/bin/activate
-                    
-                    echo "📦 Installation dans venv..."
-                    pip install "scikit-learn==1.5.2"
-                    pip install "deepchecks==0.17.3"
-                    pip install pandas numpy lightgbm imbalanced-learn joblib
-                    
-                    echo ""
-                    echo "🔍 Versions installées:"
-                    python -c "import sklearn; print('Scikit-learn:', sklearn.__version__)"
-                    
-                    echo ""
-                    echo "🔍 Exécution de Deepchecks..."
-                    cd testing
-                    python run_deepchecks.py
-                    
-                    echo ""
-                    ls -lh *.html 2>/dev/null
-                    
-                    deactivate
-                    exit 0
-                '''
-            }
-        }
-        stage('📂 Copy Deepchecks Reports') {
-            steps {
-                echo '📂 Copie des rapports Deepchecks vers monitoring...'
-                sh '''
-                    echo "📋 Fichiers Deepchecks générés:"
-                    ls -lh testing/*.html 2>/dev/null || echo "❌ Pas de fichiers HTML"
-                    
-                    echo ""
-                    echo "📂 Copie vers monitoring/..."
-                    cp -v testing/deepchecks_summary.html monitoring/ 2>/dev/null && echo "✅ deepchecks_summary copié" || echo "⚠️ deepchecks_summary non trouvé"
-                    cp -v testing/data_integrity_report.html monitoring/ 2>/dev/null && echo "✅ data_integrity copié" || echo "⚠️ data_integrity non trouvé"
-                    cp -v testing/train_test_validation_report.html monitoring/ 2>/dev/null && echo "✅ train_test_validation copié" || echo "⚠️ train_test_validation non trouvé"
-                    cp -v testing/model_evaluation_report.html monitoring/ 2>/dev/null && echo "✅ model_evaluation copié" || echo "⚠️ model_evaluation non trouvé"
-                    
-                    echo ""
-                    echo "📋 Vérification dans monitoring/:"
-                    ls -lh monitoring/*.html 2>/dev/null || echo "❌ Pas de fichiers copiés"
-                    
-                    echo ""
-                    echo "✅ Copie terminée"
-                '''
-            }
-        }
-        stage('🧪 Deepchecks Validation') {
-            steps {
-                echo '🧪 Validation du modèle avec Deepchecks...'
-                sh '''
-                    set +e
-                    
                     echo "📦 Installation de Deepchecks..."
                     pip3 install --break-system-packages "deepchecks==0.17.3"
                     
@@ -193,7 +138,54 @@ pipeline {
                 '''
             }
         }
-                
+        stage('📂 Copy Deepchecks Reports') {
+            steps {
+                echo '📂 Copie des rapports Deepchecks vers monitoring...'
+                sh '''
+                    echo "📋 Fichiers Deepchecks générés:"
+                    ls -lh testing/*.html 2>/dev/null || echo "❌ Pas de fichiers HTML"
+                    
+                    echo ""
+                    echo "📂 Copie vers monitoring/..."
+                    cp -v testing/deepchecks_summary.html monitoring/ 2>/dev/null && echo "✅ deepchecks_summary copié" || echo "⚠️ deepchecks_summary non trouvé"
+                    cp -v testing/data_integrity_report.html monitoring/ 2>/dev/null && echo "✅ data_integrity copié" || echo "⚠️ data_integrity non trouvé"
+                    cp -v testing/train_test_validation_report.html monitoring/ 2>/dev/null && echo "✅ train_test_validation copié" || echo "⚠️ train_test_validation non trouvé"
+                    cp -v testing/model_evaluation_report.html monitoring/ 2>/dev/null && echo "✅ model_evaluation copié" || echo "⚠️ model_evaluation non trouvé"
+                    
+                    echo ""
+                    echo "📋 Vérification dans monitoring/:"
+                    ls -lh monitoring/*.html 2>/dev/null || echo "❌ Pas de fichiers copiés"
+                    
+                    echo ""
+                    echo "✅ Copie terminée"
+                '''
+            }
+        }
+        stage('🔍 Validate Model Files') {
+            steps {
+                echo '🔍 Validation des fichiers du modèle...'
+                sh '''
+                    echo "📂 Vérification de l'existence des fichiers requis..."
+                    
+                    if [ -f "backend/src/processors/models/best_model_final.pkl" ]; then
+                        echo "✅ best_model_final.pkl trouvé"
+                    else
+                        echo "❌ best_model_final.pkl manquant!"
+                        exit 1
+                    fi
+                    
+                    if [ -f "backend/src/processors/preprocessor.pkl" ]; then
+                        echo "✅ preprocessor.pkl trouvé"
+                    else
+                        echo "❌ preprocessor.pkl manquant!"
+                        exit 1
+                    fi
+                    
+                    echo "✅ Tous les fichiers requis sont présents"
+                '''
+            }
+        }
+        
         stage('📊 Data Drift Monitoring') {
             steps {
                 echo '📊 Vérification du data drift avec Evidently...'
