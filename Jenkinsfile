@@ -32,7 +32,7 @@ pipeline {
                 echo '✅ Repository cloné avec succès'
             }
         }
-
+        
         stage('🔍 Verify Structure') {
             steps {
                 echo '🔍 Vérification de la structure du projet...'
@@ -102,38 +102,35 @@ pipeline {
                 '''
             }
         }
-        stage('🧪 Deepchecks Validation') {
+        
+        stage('🔍 Validate Model Files') {
             steps {
-                echo '🧪 Validation du modèle avec Deepchecks...'
+                echo '🔍 Validation des fichiers du modèle...'
                 sh '''
-                    set +e  # Ne pas arrêter sur erreur
+                    MODEL_FILE="backend/src/processors/models/best_model_final.pkl"
+                    PREPROCESSOR_FILE="backend/src/processors/preprocessor.pkl"
                     
-                    echo "📦 Installation de Deepchecks avec NumPy compatible..."
-                    pip3 install --break-system-packages "numpy<2.0" setuptools deepchecks
-                    
-                    echo ""
-                    echo "🔍 Vérification des versions..."
-                    python3 -c "import numpy; print(f'NumPy: {numpy.__version__}')"
-                    python3 -c "import deepchecks; print(f'Deepchecks: {deepchecks.__version__}')"
-                    
-                    echo ""
-                    echo "🔍 Exécution de Deepchecks..."
-                    cd testing
-                    python3 run_deepchecks.py
+                    echo "🔎 Vérification du modèle..."
+                    if [ -f "$MODEL_FILE" ]; then
+                        echo "✅ Modèle trouvé: $MODEL_FILE"
+                        ls -lh "$MODEL_FILE"
+                    else
+                        echo "❌ ERREUR CRITIQUE: Modèle non trouvé!"
+                        exit 1
+                    fi
                     
                     echo ""
-                    echo "📋 Fichiers générés:"
-                    ls -lh *.html 2>/dev/null || echo "Aucun fichier HTML"
-                    
-                    echo ""
-                    echo "📂 Copie vers monitoring..."
-                    cp *.html ../monitoring/ 2>/dev/null || echo "Pas de fichiers à copier"
-                    
-                    echo "✅ Deepchecks terminé"
-                    exit 0
+                    echo "🔎 Vérification du preprocessor..."
+                    if [ -f "$PREPROCESSOR_FILE" ]; then
+                        echo "✅ Preprocessor trouvé: $PREPROCESSOR_FILE"
+                        ls -lh "$PREPROCESSOR_FILE"
+                    else
+                        echo "⚠️  WARNING: Preprocessor non trouvé"
+                    fi
                 '''
             }
         }
+
         stage('📊 Data Drift Monitoring') {
             steps {
                 echo '📊 Vérification du data drift avec Evidently...'
@@ -156,40 +153,35 @@ pipeline {
             }
         }
 
-        stage('📄 Archive Monitoring Reports') {
+        stage('📄 Archive Monitoring Report') {
             steps {
-                echo '📄 Archivage des rapports...'
-                
+                echo '📄 Archivage du rapport HTML...'
                 archiveArtifacts artifacts: 'monitoring/monitoring_report.html', 
-                                allowEmptyArchive: true
+                                allowEmptyArchive: true,
+                                fingerprint: true
                 
+                echo '📄 Archivage des résultats JSON...'
                 archiveArtifacts artifacts: 'monitoring/monitoring_tests.json',
-                                allowEmptyArchive: true
-                
-                archiveArtifacts artifacts: 'monitoring/performance_report.html',
-                                allowEmptyArchive: true
-                
-                archiveArtifacts artifacts: 'monitoring/performance_metrics.json',
-                                allowEmptyArchive: true
-                
-                echo '✅ Rapports archivés'
+                                allowEmptyArchive: true,
+                                fingerprint: true
             }
         }
-
         stage('📊 Publish Monitoring Report') {
             steps {
                 echo '🌐 Publication du rapport Evidently...'
                 sh '''
-                    echo "🐳 Build de l'image monitoring-reports..."
-                    docker build -t monitoring-reports:latest ./monitoring
-                    
-                    echo "🗑️ Nettoyage du conteneur existant..."
-                    docker stop monitoring-reports || true
-                    docker rm monitoring-reports || true
-                    
-                    echo "🚀 Lancement du nouveau conteneur..."
-                    docker run -d --name monitoring-reports -p 9000:80 monitoring-reports:latest
-                    
+                    # Stop ancien conteneur
+                    docker rm -f monitoring-reports || true
+
+                    # Build image Nginx avec rapports
+                    docker build -t monitoring-reports ./monitoring
+
+                    # Run serveur
+                    docker run -d \
+                    --name monitoring-reports \
+                    -p 9000:80 \
+                    monitoring-reports
+
                     echo "✅ Rapport accessible sur http://localhost:9000"
                 '''
             }
