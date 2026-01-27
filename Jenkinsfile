@@ -90,13 +90,11 @@ pipeline {
                 sh '''
                     set +e
                     
-                    echo "📦 Installation de Deepchecks SANS mettre à jour scikit-learn..."
-                    pip3 install --break-system-packages --no-deps setuptools deepchecks
-                    pip3 install --break-system-packages pandas jsonpickle PyNomaly typing-extensions tqdm category-encoders scipy plotly matplotlib beautifulsoup4 requests statsmodels numpy ipython ipykernel ipywidgets jupyter-server
+                    echo "📦 Installation de Deepchecks 0.17.3 (compatible)..."
+                    pip3 install --break-system-packages "deepchecks==0.17.3"
                     
                     echo ""
                     echo "🔍 Vérification des versions:"
-                    python3 -c "import numpy; print('NumPy:', numpy.__version__)"
                     python3 -c "import sklearn; print('Scikit-learn:', sklearn.__version__)"
                     python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)"
                     
@@ -104,9 +102,12 @@ pipeline {
                     echo "🔍 Exécution de Deepchecks..."
                     cd testing
                     python3 run_deepchecks.py
+                    EXIT_CODE=$?
                     
                     echo ""
-                    echo "✅ Stage terminé"
+                    echo "📋 Fichiers générés:"
+                    ls -lh *.html 2>/dev/null || echo "❌ Aucun fichier HTML"
+                    
                     exit 0
                 '''
             }
