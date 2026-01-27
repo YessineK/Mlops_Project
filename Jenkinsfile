@@ -1,434 +1,208 @@
 pipeline {
     agent any
-    
+
     environment {
-        // Docker Hub credentials
+        // Docker Hub
         DOCKER_HUB_USERNAME = 'yessinekarray'
-	    DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-credentials'
-        
-        // Image names
+        DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-credentials'
+
+        // Images
         BACKEND_IMAGE = "${DOCKER_HUB_USERNAME}/churn-backend"
         FRONTEND_IMAGE = "${DOCKER_HUB_USERNAME}/churn-frontend"
-        
-        // Version
+
+        // Tags
         IMAGE_TAG = "v${BUILD_NUMBER}"
         IMAGE_TAG_LATEST = "latest"
     }
-    
+
     stages {
-        
-        stage('🧹 Cleanup') {
+
+        stage('🧹 Cleanup Workspace') {
             steps {
-                echo '🧹 Nettoyage du workspace...'
                 cleanWs()
-                
-                // ⭐ AJOUTEZ CECI
                 sh '''
-                    echo "🗑️ Suppression des anciennes images Docker..."
-                    docker rmi -f yessinekarray/churn-backend:latest || true
-                    docker rmi -f yessinekarray/churn-frontend:latest || true
-                    docker image prune -f
+                    echo "🧹 Nettoyage Docker safe..."
+                    docker rm -f monitoring-reports || true
+                    docker image prune -f --filter "dangling=true"
                 '''
             }
         }
-        
+
         stage('📥 Clone Repository') {
             steps {
-                echo '📥 Clone du repository GitHub...'
                 git branch: 'main',
                     url: 'https://github.com/YessineK/Mlops_Project.git'
-                echo '✅ Repository cloné avec succès'
             }
         }
-        
-        stage('🔍 Verify Structure') {
+
+        stage('🔍 Verify Project Structure') {
             steps {
-                echo '🔍 Vérification de la structure du projet...'
                 sh '''
-                    echo "📂 Structure du projet:"
                     ls -la
-                    
-                    echo ""
-                    echo "📂 Model Registry:"
-                    ls -la notebooks/model_registry/ || echo "❌ Model registry non trouvé"
-                    
-                    echo ""
-                    echo "📂 Notebooks Processors:"
-                    ls -la notebooks/processors/ || echo "❌ Processors non trouvés"
-                    
-                    echo ""
-                    echo "📂 Backend:"
-                    ls -la backend/src/ || echo "❌ Backend non trouvé"
-                    
-                    echo ""
-                    echo "📂 Frontend:"
-                    ls -la frontend/ || echo "❌ Frontend non trouvé"
+                    ls -la backend/src || exit 1
+                    ls -la frontend || exit 1
+                    ls -la notebooks || exit 1
                 '''
             }
         }
-        
-        stage('🐍 Setup Python Environment') {
-            steps {
-                echo '🐍 Configuration de l\'environnement Python...'
-                sh '''
-                    if command -v python3 &> /dev/null; then
-                        echo "✅ Python3 trouvé"
-                        python3 --version
-                        
-                        echo ""
-                        echo "📦 Installation des packages Python requis..."
-                        pip3 install --break-system-packages \
-                            imbalanced-learn \
-                            scikit-learn \
-                            pandas \
-                            numpy \
-                            lightgbm \
-                            joblib || true
-                        
-                        echo "✅ Packages Python installés"
-                    else
-                        echo "❌ Python3 non trouvé!"
-                        exit 1
-                    fi
-                '''
-            }
-        }
-        
+
         stage('📊 Register Best Model') {
             steps {
-                echo '📊 Enregistrement du meilleur modèle...'
                 sh '''
-                    echo "🚀 Exécution de register_best_model.py"
-                    python3 Jenkins/register_best_model.py
-                    
-                    echo ""
-                    echo "✅ Script de registration terminé"
-                    
-                    echo ""
-                    echo "🔍 Vérification des fichiers générés:"
-                    ls -lh backend/src/processors/models/ || echo "❌ Dossier models non trouvé!"
-                '''
-            }
-        }
-        
-        stage('🔍 Validate Model Files') {
-            steps {
-                echo '🔍 Validation des fichiers du modèle...'
-                sh '''
-                    MODEL_FILE="backend/src/processors/models/best_model_final.pkl"
-                    PREPROCESSOR_FILE="backend/src/processors/preprocessor.pkl"
-                    
-                    echo "🔎 Vérification du modèle..."
-                    if [ -f "$MODEL_FILE" ]; then
-                        echo "✅ Modèle trouvé: $MODEL_FILE"
-                        ls -lh "$MODEL_FILE"
-                    else
-                        echo "❌ ERREUR CRITIQUE: Modèle non trouvé!"
-                        exit 1
-                    fi
-                    
-                    echo ""
-                    echo "🔎 Vérification du preprocessor..."
-                    if [ -f "$PREPROCESSOR_FILE" ]; then
-                        echo "✅ Preprocessor trouvé: $PREPROCESSOR_FILE"
-                        ls -lh "$PREPROCESSOR_FILE"
-                    else
-                        echo "⚠️  WARNING: Preprocessor non trouvé"
-                    fi
+                    docker run --rm \
+                      -v $WORKSPACE:/app \
+                      python:3.10-slim \
+                      bash -c "
+                        pip install --no-cache-dir scikit-learn pandas numpy joblib lightgbm &&
+                        python /app/Jenkins/register_best_model.py
+                      "
                 '''
             }
         }
 
-        stage('📊 Data Drift Monitoring') {
+        stage('🔍 Validate Model Artifacts') {
             steps {
-                echo '📊 Vérification du data drift avec Evidently...'
                 sh '''
-                    echo "📦 Installation d'Evidently..."
-                    pip3 install --break-system-packages evidently || true
-                    
-                    echo ""
-                    echo "📂 Préparation des données..."
-                    cd monitoring
-                    python3 prepare_data.py
-                    
-                    echo ""
-                    echo "📊 Génération du rapport de monitoring..."
-                    python3 run_monitoring.py
-                    
-                    echo ""
-                    echo "✅ Monitoring terminé"
+                    test -f backend/src/processors/models/best_model_final.pkl
+                    echo "✅ Modèle validé"
                 '''
             }
         }
 
-        stage('📄 Archive Monitoring Report') {
+        stage('📊 Data Drift Monitoring (Evidently)') {
             steps {
-                echo '📄 Archivage du rapport HTML...'
-                archiveArtifacts artifacts: 'monitoring/monitoring_report.html', 
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                echo '📄 Archivage des résultats JSON...'
-                archiveArtifacts artifacts: 'monitoring/monitoring_tests.json',
-                                allowEmptyArchive: true,
-                                fingerprint: true
+                sh '''
+                    docker run --rm \
+                      -v $WORKSPACE:/app \
+                      python:3.10-slim \
+                      bash -c "
+                        pip install --no-cache-dir evidently pandas numpy &&
+                        cd /app/monitoring &&
+                        python prepare_data.py &&
+                        python run_monitoring.py
+                      "
+                '''
             }
         }
-        stage('📊 Publish Monitoring Report') {
-            steps {
-                echo '🌐 Publication du rapport Evidently...'
-                sh '''
-                    # Stop ancien conteneur
-                    docker rm -f monitoring-reports || true
 
-                    # Build image Nginx avec rapports
+        stage('📄 Archive Monitoring Reports') {
+            steps {
+                archiveArtifacts artifacts: 'monitoring/*.html', allowEmptyArchive: true
+                archiveArtifacts artifacts: 'monitoring/*.json', allowEmptyArchive: true
+            }
+        }
+
+        stage('🌐 Publish Monitoring Report') {
+            steps {
+                sh '''
                     docker build -t monitoring-reports ./monitoring
-
-                    # Run serveur
                     docker run -d \
-                    --name monitoring-reports \
-                    -p 9000:80 \
-                    monitoring-reports
-
-                    echo "✅ Rapport accessible sur http://localhost:9000"
+                      --name monitoring-reports \
+                      -p 9000:80 \
+                      monitoring-reports
                 '''
             }
         }
 
         stage('🐳 Build Docker Images') {
             parallel {
-                stage('Build Backend Image') {
+                stage('Backend Image') {
                     steps {
-                        echo '🐳 Construction de l\'image Backend...'
                         sh """
                             cd backend/src
-                            
-                            echo "🔨 Build de l'image Backend..."
                             docker build \
-                                -t ${BACKEND_IMAGE}:${IMAGE_TAG} \
-                                -t ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST} \
-                                --build-arg BUILD_DATE=\$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-                                --build-arg VERSION=${IMAGE_TAG} \
-                                --build-arg BUILD_NUMBER=${BUILD_NUMBER} \
-                                .
-                            
-                            echo "✅ Backend image construite: ${BACKEND_IMAGE}:${IMAGE_TAG}"
+                              -t ${BACKEND_IMAGE}:${IMAGE_TAG} \
+                              -t ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST} \
+                              .
                         """
                     }
                 }
-                
-                stage('Build Frontend Image') {
+
+                stage('Frontend Image') {
                     steps {
-                        echo '🐳 Construction de l\'image Frontend...'
                         sh """
                             cd frontend
-                            
-                            echo "🔨 Build de l'image Frontend..."
                             docker build \
-                                -t ${FRONTEND_IMAGE}:${IMAGE_TAG} \
-                                -t ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST} \
-                                --build-arg BUILD_DATE=\$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-                                --build-arg VERSION=${IMAGE_TAG} \
-                                --build-arg BUILD_NUMBER=${BUILD_NUMBER} \
-                                .
-                            
-                            echo "✅ Frontend image construite: ${FRONTEND_IMAGE}:${IMAGE_TAG}"
+                              -t ${FRONTEND_IMAGE}:${IMAGE_TAG} \
+                              -t ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST} \
+                              .
                         """
                     }
                 }
             }
         }
-        
+
         stage('🧪 Test Docker Images') {
             steps {
-                echo '🧪 Test des images Docker construites...'
                 sh '''
-                    echo "🔍 Images Docker disponibles:"
-                    docker images | grep churn || echo "❌ Aucune image trouvée!"
-                    
-                    echo ""
-                    echo "🧪 Test de l'image Backend..."
                     docker run --rm ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST} python --version
-                    echo "✅ Backend image fonctionne"
-                    
-                    echo ""
-                    echo "🧪 Test de l'image Frontend..."
                     docker run --rm ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST} python --version
-                    echo "✅ Frontend image fonctionne"
                 '''
             }
         }
 
-        stage('🚀 Push to Docker Hub') {
+        stage('📤 Push to Docker Hub') {
             steps {
-                script {
-                    echo '📤 Push des images vers Docker Hub...'
-                    
-                    timeout(time: 5, unit: 'MINUTES') {  // ⭐ SEULEMENT CETTE LIGNE À AJOUTER
-                        withCredentials([usernamePassword(
-                            credentialsId: 'docker-hub-credentials',
-                            usernameVariable: 'DOCKER_USER',
-                            passwordVariable: 'DOCKER_PASS'
-                        )]) {
-                            sh '''
-                                echo "🔐 Connexion à Docker Hub..."
-                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                                
-                                echo ""
-                                echo "📤 Push Backend images..."
-                                docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
-                                echo "✅ Pushed: ${BACKEND_IMAGE}:${IMAGE_TAG}"
-                                
-                                docker push ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST}
-                                echo "✅ Pushed: ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST}"
-                                
-                                echo ""
-                                echo "📤 Push Frontend images..."
-                                docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
-                                echo "✅ Pushed: ${FRONTEND_IMAGE}:${IMAGE_TAG}"
-                                
-                                docker push ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST}
-                                echo "✅ Pushed: ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST}"
-                                
-                                echo ""
-                                echo "✅ Toutes les images ont été pushées avec succès!"
-                                
-                                echo ""
-                                echo "🔓 Déconnexion de Docker Hub..."
-                                docker logout
-                            '''
-                        }
-                    }  // ⭐ FERMETURE DU TIMEOUT
+                withCredentials([usernamePassword(
+                    credentialsId: DOCKER_HUB_CREDENTIALS_ID,
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
+                        docker push ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST}
+                        docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
+                        docker push ${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST}
+                        docker logout
+                    '''
                 }
             }
         }
-        
+
         stage('🚀 Deploy Application') {
             steps {
-                echo '🚀 Déploiement de l\'application...'
                 sh '''
-                    echo "📂 Navigation vers le workspace..."
-                    cd "${WORKSPACE}"
-                    
-                    echo ""
-                    echo "🛑 Arrêt des conteneurs existants..."
-                    docker compose down || true
-                    
-                    echo ""
-                    echo "🧹 Nettoyage des conteneurs arrêtés..."
-                    docker container prune -f || true
-                    
-                    echo ""
-                    echo "🚀 Démarrage des nouveaux conteneurs..."
-                    docker compose up -d
-                    
-                    echo ""
-                    echo "⏳ Attente du démarrage des services (10s)..."
-                    sleep 10
-                    
-                    echo ""
-                    echo "🔍 Vérification des conteneurs actifs:"
-                    docker compose ps
-                    
-                    echo ""
-                    echo "✅ Déploiement terminé!"
+                    docker-compose down || true
+                    docker-compose up -d
+                    docker-compose ps
                 '''
             }
         }
-        
+
         stage('🏥 Health Check') {
             steps {
-                echo '🏥 Vérification de la santé des services...'
                 sh '''
-                    echo "🔍 Conteneurs en cours d'exécution:"
-                    docker ps --filter "name=churn" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || true
-                    
-                    echo ""
-                    echo "🔍 Logs Backend (dernières 20 lignes):"
-                    docker compose logs --tail=20 backend || true
-                    
-                    echo ""
-                    echo "🔍 Logs Frontend (dernières 20 lignes):"
-                    docker compose logs --tail=20 frontend || true
+                    docker ps
+                    docker-compose logs --tail=20 backend || true
+                    docker-compose logs --tail=20 frontend || true
                 '''
             }
         }
-        
-        stage('📊 Generate Build Report') {
+
+        stage('📊 Build Report') {
             steps {
-                echo '📊 Génération du rapport de build...'
                 sh '''
-                    echo ""
-                    echo "================================================================================"
-                    echo "                       🎉 JENKINS BUILD REPORT 🎉"
-                    echo "================================================================================"
-                    echo ""
-                    echo "📋 Build Information:"
-                    echo "   Build Number:     #${BUILD_NUMBER}"
-                    echo "   Build Tag:        ${BUILD_TAG}"
-                    echo "   Job Name:         ${JOB_NAME}"
-                    echo "   Timestamp:        $(date)"
-                    echo ""
-                    echo "🐳 Docker Images Created:"
-                    echo "   Backend:          ${BACKEND_IMAGE}:${IMAGE_TAG}"
-                    echo "   Backend (latest): ${BACKEND_IMAGE}:${IMAGE_TAG_LATEST}"
-                    echo "   Frontend:         ${FRONTEND_IMAGE}:${IMAGE_TAG}"
-                    echo "   Frontend (latest):${FRONTEND_IMAGE}:${IMAGE_TAG_LATEST}"
-                    echo ""
-                    echo "📦 Docker Hub Links:"
-                    echo "   Backend:  https://hub.docker.com/r/${DOCKER_HUB_USERNAME}/churn-backend"
-                    echo "   Frontend: https://hub.docker.com/r/${DOCKER_HUB_USERNAME}/churn-frontend"
-                    echo ""
-                    echo "🚀 Pull & Deploy Commands:"
-                    echo "   docker pull ${BACKEND_IMAGE}:latest"
-                    echo "   docker pull ${FRONTEND_IMAGE}:latest"
-                    echo "   docker-compose up -d"
-                    echo ""
-                    echo "📊 Current Containers:"
-                    docker ps --filter "name=churn" --format "   {{.Names}} - {{.Status}}" || true
-                    echo ""
-                    echo "✅ Build completed successfully!"
-                    echo "================================================================================"
+                    echo "========================================"
+                    echo "🎉 BUILD SUCCESS 🎉"
+                    echo "Backend:  ${BACKEND_IMAGE}:${IMAGE_TAG}"
+                    echo "Frontend: ${FRONTEND_IMAGE}:${IMAGE_TAG}"
+                    echo "Monitoring: http://localhost:9000"
+                    echo "========================================"
                 '''
             }
         }
     }
-    
+
     post {
         success {
-            script {
-                echo '✅✅✅ PIPELINE EXÉCUTÉ AVEC SUCCÈS! ✅✅✅'
-                echo ''
-                echo '🎉 Images Docker créées et pushées:'
-                echo "   Backend:  ${BACKEND_IMAGE}:${IMAGE_TAG}"
-                echo "   Frontend: ${FRONTEND_IMAGE}:${IMAGE_TAG}"
-                echo ''
-                echo '🌐 Vos images sont disponibles sur Docker Hub!'
-                echo "   https://hub.docker.com/r/${DOCKER_HUB_USERNAME}/churn-backend"
-                echo "   https://hub.docker.com/r/${DOCKER_HUB_USERNAME}/churn-frontend"
-            }
+            echo '✅ PIPELINE MLOps EXÉCUTÉ AVEC SUCCÈS'
         }
-        
         failure {
-            script {
-                echo '❌❌❌ PIPELINE ÉCHOUÉ! ❌❌❌'
-                echo ''
-                echo '🔍 Vérifiez les logs ci-dessus pour identifier l\'erreur'
-            }
+            echo '❌ PIPELINE EN ÉCHEC — vérifier les logs'
         }
-        
         always {
-            script {
-                echo ''
-                echo '🧹 Nettoyage final...'
-                
-                sh '''
-                    echo "🗑️  Suppression des images Docker non utilisées..."
-                    docker image prune -f || true
-                '''
-                
-                echo "📊 Build terminé"
-            }
+            sh 'docker image prune -f --filter "dangling=true" || true'
         }
     }
 }
