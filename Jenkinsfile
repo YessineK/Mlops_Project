@@ -61,7 +61,7 @@ pipeline {
                     
                     echo ""
                     echo "📦 Installation des packages Python requis..."
-                    pip3 install --break-system-packages imbalanced-learn scikit-learn pandas numpy lightgbm joblib
+                    pip3 install --break-system-packages "scikit-learn==1.5.2" imbalanced-learn pandas numpy lightgbm joblib
                     echo "✅ Packages Python installés"
                 '''
             }
@@ -132,25 +132,19 @@ pipeline {
                 echo '📂 Copie des rapports Deepchecks vers monitoring...'
                 sh '''
                     echo "📋 Fichiers Deepchecks générés:"
-                    ls -lh testing/*.html 2>/dev/null | grep -E "(deepchecks|integrity|validation|evaluation)" || echo "Aucun fichier trouvé"
+                    ls -lh testing/*.html 2>/dev/null
                     
                     echo ""
                     echo "📂 Copie vers monitoring/..."
-                    cp -v testing/deepchecks_summary.html monitoring/ 2>/dev/null && echo "✅ summary copié" || echo "⚠️ summary non trouvé"
-                    cp -v testing/data_integrity_report.html monitoring/ 2>/dev/null && echo "✅ integrity copié" || echo "⚠️ integrity non trouvé"
-                    cp -v testing/train_test_validation_report.html monitoring/ 2>/dev/null && echo "✅ validation copié" || echo "⚠️ validation non trouvé"
-                    cp -v testing/model_evaluation_report.html monitoring/ 2>/dev/null && echo "✅ evaluation copié" || echo "⚠️ evaluation non trouvé"
-                    
-                    echo ""
-                    echo "📋 Vérification dans monitoring/:"
-                    ls -lh monitoring/*.html 2>/dev/null | grep -E "(deepchecks|integrity|validation|evaluation)" || echo "Aucun fichier Deepchecks dans monitoring/"
+                    cp -v testing/data_distribution_test.html monitoring/ 2>/dev/null && echo "✅ data_distribution copié" || echo "⚠️ data_distribution non trouvé"
+                    cp -v testing/result_integrity_test.html monitoring/ 2>/dev/null && echo "✅ result_integrity copié" || echo "⚠️ result_integrity non trouvé"
+                    cp -v testing/result_model_test.html monitoring/ 2>/dev/null && echo "✅ result_model copié" || echo "⚠️ result_model non trouvé"
                     
                     echo ""
                     echo "✅ Copie terminée"
                 '''
             }
         }
-        
         stage('🔍 Validate Model Files') {
             steps {
                 echo '🔍 Validation des fichiers du modèle...'
