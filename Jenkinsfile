@@ -114,7 +114,7 @@ pipeline {
                 echo "📊 Vérification du data drift avec Evidently..."
                 sh '''
                     echo "📦 Installation d'Evidently..."
-                    pip3 install --break-system-packages evidently<0.4.0
+                    pip3 install --break-system-packages 'evidently<0.4.0'
                     
                     # RÉINSTALLER scikit-learn 1.5.2 après Evidently
                     echo "🔧 Réinstallation de scikit-learn 1.5.2..."
@@ -131,31 +131,6 @@ pipeline {
                 '''
             }
         }
-        
-        stage('📄 Archive Monitoring Reports') {
-            steps {
-                echo '📄 Archivage des rapports de monitoring...'
-                
-                archiveArtifacts artifacts: 'monitoring/monitoring_report.html',
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                archiveArtifacts artifacts: 'monitoring/monitoring_tests.json',
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                archiveArtifacts artifacts: 'monitoring/performance_report.html',
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                archiveArtifacts artifacts: 'monitoring/performance_metrics.json',
-                                allowEmptyArchive: true,
-                                fingerprint: true
-                
-                echo '✅ Rapports de monitoring archivés'
-            }
-        }
-        
         stage('📊 Publish Monitoring Report') {
             steps {
                 echo '🌐 Publication du rapport de monitoring...'
