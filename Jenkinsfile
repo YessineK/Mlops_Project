@@ -110,23 +110,29 @@ pipeline {
                 sh '''
                     set +e
                     
-                    echo "📦 Installation de IPython 8.18.1 (compatible)..."
-                    pip3 install --break-system-packages "ipython==8.18.1"
+                    echo "🗑️ Désinstallation complète..."
+                    pip3 uninstall -y pandas scikit-learn ipython ipywidgets pyzmq
                     
                     echo ""
-                    echo "📦 Installation de ipywidgets 8.1.1..."
-                    pip3 install --break-system-packages "ipywidgets==8.1.1"
+                    echo "📦 Installation de l'écosystème compatible Deepchecks 0.17.3..."
+                    pip3 install --break-system-packages "pandas==1.5.3"
+                    pip3 install --break-system-packages "scikit-learn==1.3.2" || echo "⚠️ scikit-learn 1.3.2 failed, using 1.4.2"
+                    pip3 install --break-system-packages "scikit-learn==1.4.2"
+                    pip3 install --break-system-packages "ipython==7.34.0"
+                    pip3 install --break-system-packages "ipywidgets==7.8.5"
+                    pip3 install --break-system-packages "pyzmq==23.2.1" || echo "⚠️ pyzmq build failed, skipping"
                     
                     echo ""
-                    echo "📦 Installation de Deepchecks 0.17.3 (SANS dépendances)..."
+                    echo "📦 Installation de Deepchecks 0.17.3..."
                     pip3 install --break-system-packages "deepchecks==0.17.3" --no-deps
                     
                     echo ""
-                    echo "📦 Installation manuelle des dépendances..."
-                    pip3 install --break-system-packages pandas numpy scipy plotly matplotlib requests jsonpickle tqdm statsmodels category-encoders PyNomaly beautifulsoup4 ipykernel jupyter-client
+                    echo "📦 Installation des autres dépendances..."
+                    pip3 install --break-system-packages numpy scipy plotly matplotlib requests jsonpickle tqdm statsmodels category-encoders PyNomaly beautifulsoup4 ipykernel jupyter-client
                     
                     echo ""
                     echo "🔍 Vérification des versions:"
+                    python3 -c "import pandas; print('Pandas:', pandas.__version__)"
                     python3 -c "import sklearn; print('Scikit-learn:', sklearn.__version__)"
                     python3 -c "import IPython; print('IPython:', IPython.__version__)"
                     python3 -c "import deepchecks; print('Deepchecks:', deepchecks.__version__)" || echo "❌ Deepchecks import failed"
@@ -144,15 +150,13 @@ pipeline {
                     echo ""
                     echo "📊 Exit code: $EXIT_CODE"
                     echo ""
-                    echo "📋 Nouveaux fichiers générés:"
-                    ls -lh *.html 2>/dev/null || echo "❌ Aucun fichier HTML généré"
+                    echo "📋 Fichiers générés:"
+                    ls -lh *.html 2>/dev/null || echo "❌ Aucun fichier HTML"
                     
-                    echo ""
-                    echo "✅ Stage terminé"
                     exit 0
                 '''
             }
-}
+        }
         stage('📂 Copy Deepchecks Reports') {
             steps {
                 echo '📂 Copie des rapports Deepchecks vers monitoring...'
