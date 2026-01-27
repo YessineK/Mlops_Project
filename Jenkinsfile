@@ -1,13 +1,16 @@
 pipeline {
     agent any
-    
+
+    triggers {
+        githubPush()
+    }
+
     environment {
         DOCKER_HUB_REPO = 'yessinekarray'
         BACKEND_IMAGE = 'churn-backend'
         FRONTEND_IMAGE = 'churn-frontend'
         BUILD_NUMBER = "${env.BUILD_NUMBER}"
     }
-    
     stages {
         stage('🧹 Cleanup') {
             steps {
