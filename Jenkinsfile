@@ -83,7 +83,27 @@ pipeline {
                 '''
             }
         }
-        
+        stage('🔍 Locate Model File') {
+            steps {
+                echo '🔍 Recherche du modèle généré...'
+                sh '''
+                    echo "📂 Recherche de best_model_final.pkl:"
+                    find . -name "best_model_final.pkl" -type f 2>/dev/null
+                    
+                    echo ""
+                    echo "📂 Recherche de tous les .pkl:"
+                    find . -name "*.pkl" -type f 2>/dev/null
+                    
+                    echo ""
+                    echo "📂 Contenu de backend/src/processors/models/:"
+                    ls -lah backend/src/processors/models/ 2>/dev/null || echo "❌ Dossier n'existe pas"
+                    
+                    echo ""
+                    echo "📂 Structure backend/src/:"
+                    find backend/src/ -type f -name "*.pkl" 2>/dev/null
+                '''
+            }
+        }
         stage('🧪 Deepchecks Validation') {
             steps {
                 echo '🧪 Validation du modèle avec Deepchecks...'
