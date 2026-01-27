@@ -729,40 +729,7 @@ MinIO (S3)
 │   └── churn_latest.pkl
 ```
 
----
-
-### **Phase 3: Kubernetes Deployment** ⚓
-
-**Migration Docker → Kubernetes:**
-
-```yaml
-# Exemple de manifests
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: churn-backend
-spec:
-  replicas: 3
-  template:
-    spec:
-      containers:
-      - name: backend
-        image: yessinekarray/churn-backend:latest
-        resources:
-          limits:
-            memory: "2Gi"
-            cpu: "1000m"
-```
-
-**Avantages:**
-- Auto-scaling basé sur charge CPU/mémoire
-- Rolling updates sans downtime
-- Health checks automatiques
-- Load balancing natif
-
----
-
-### **Phase 4: A/B Testing** 🧪
+### **Phase 3: A/B Testing** 🧪
 
 **Objectif:** Comparer 2 versions du modèle en production
 
@@ -811,68 +778,6 @@ log_prediction(user_id, model_version, prediction, actual)
 
 ---
 
-## 📚 Documentation & APIs
-
-### **API Backend (FastAPI)**
-
-**Swagger UI:** http://localhost:8000/docs
-
-#### **Endpoints disponibles:**
-
-**1. Health Check**
-```http
-GET /health
-
-Response 200:
-{
-  "status": "healthy",
-  "model_loaded": true,
-  "timestamp": "2026-01-27T10:30:00Z"
-}
-```
-
-**2. Prédiction Churn**
-```http
-POST /predict
-Content-Type: application/json
-
-Request Body:
-{
-  "customer_age": 45,
-  "gender": "M",
-  "dependent_count": 2,
-  "education_level": "Graduate",
-  "marital_status": "Married",
-  "income_category": "$60K - $80K",
-  "card_category": "Blue",
-  "months_on_book": 39,
-  "total_relationship_count": 5,
-  "months_inactive_12_mon": 1,
-  "contacts_count_12_mon": 3,
-  "credit_limit": 12691.51,
-  "total_revolving_bal": 777,
-  "avg_open_to_buy": 11914.51,
-  "total_amt_chng_q4_q1": 1.335,
-  "total_trans_amt": 1144,
-  "total_trans_ct": 42,
-  "total_ct_chng_q4_q1": 1.625,
-  "avg_utilization_ratio": 0.061
-}
-
-Response 200:
-{
-  "churn_prediction": 0,
-  "churn_probability": 0.023,
-  "risk_level": "low",
-  "features_importance": {
-    "total_trans_ct": 0.245,
-    "total_trans_amt": 0.198,
-    "avg_utilization_ratio": 0.156
-  }
-}
-```
-
----
 
 ### **Dashboard Monitoring**
 
@@ -910,8 +815,6 @@ Response 200:
 
 ---
 
-## 👥 Équipe
-
 ### **Master 2 Data Science - Université Claude Bernard Lyon 1**
 
 Ce projet a été réalisé dans le cadre du Master 2 Data Science à l'**Université Claude Bernard Lyon 1** (UCBL).
@@ -932,38 +835,4 @@ Ce projet a été réalisé dans le cadre du Master 2 Data Science à l'**Univer
 
 ---
 
-## 📄 Licence
 
-MIT License - Libre d'utilisation pour l'éducation et la recherche.
-
----
-
-## 🙏 Remerciements
-
-- **MLflow Team** - Framework de tracking exceptionnel
-- **Evidently AI** - Outils de monitoring de qualité
-- **DagsHub** - Hébergement MLflow gratuit pour projets académiques
-- **FastAPI & Streamlit** - Frameworks modernes et intuitifs
-- **Jenkins Community** - CI/CD open-source robuste
-- **Université Claude Bernard Lyon 1** - Formation de qualité en Data Science
-
----
-
-## 📞 Contact
-
-Pour toute question sur ce projet:
-
-- 📧 **Email académique:** Via l'université
-- 🔗 **GitHub:** https://github.com/YessineK/Mlops_Project
-- 📊 **MLflow:** https://dagshub.com/karrayyessine1/MLOps_Project
-- 🐳 **Docker Hub:** https://hub.docker.com/u/yessinekarray
-
----
-
-<div align="center">
-
-**⭐ Si ce projet vous a été utile, n'hésitez pas à le star! ⭐**
-
-Made with ❤️ by Master 2 Data Science Students - Université Claude Bernard Lyon 1
-
-</div>
