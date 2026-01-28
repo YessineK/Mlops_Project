@@ -37,12 +37,19 @@ Ce projet implémente un **système complet de prédiction du churn bancaire** a
 - **Monitoring de drift** avec Evidently AI
 - **Déploiement containerisé** avec Docker et Docker Compose
 - **API REST** avec FastAPI et interface utilisateur Streamlit
+  ## Pipeline MLOps
+![Pipeline](pipline.png)
+
+## Démonstration
+[▶️ Voir la vidéo explicative](mlops-project-video-compressé.mp4)
+
 
 ### 🎓 Contexte Académique
 
 **Programme:** Master 2 Data Science  
 **Institution:** Université Claude Bernard Lyon 1  
 **Objectif pédagogique:** Maîtriser l'ensemble du cycle de vie MLOps, de l'expérimentation à la production
+
 
 ### 🏆 Résultats Clés
 
