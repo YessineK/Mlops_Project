@@ -42,7 +42,8 @@ Ce projet implémente un **système complet de prédiction du churn bancaire** a
 ![Pipeline](Pipline.png)
 
 ## Démonstration vidéo
-[▶️ Voir la vidéo MLOps (Google Drive)](https://drive.google.com/file/d/1dbZ--5kpUKimRKwbaM1u1HO2CbkuVwRJ/view?usp=sharing)
+[▶️ Voir la vidéo MLOps](https://drive.google.com/file/d/1dbZ--5kpUKimRKwbaM1u1HO2CbkuVwRJ/preview)
+
 
 
 ### 🎓 Contexte Académique
